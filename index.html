@@ -286,7 +286,7 @@ async function handleClockIn(){
  const activity=document.getElementById("activity").value;
  const tag=document.getElementById("category").value;
  const notes=document.getElementById("notes").value;
- const start_time=new Date().toISOString();
+ const start_time = new Date().toLocaleString();
  await supabase.from("logs").insert({user_id:user.id,start_time,activity,tag,notes});
  localStorage.setItem("meri_clocked_in",start_time);
  localStorage.setItem("meri_clocked_in_activity",activity);
@@ -298,7 +298,7 @@ async function handleClockIn(){
 async function handleClockOut(){
  const user=await getCurrentUser();if(!user)return;
  const startIso=localStorage.getItem("meri_clocked_in");
- const end_time=new Date().toISOString();
+ const end_time = new Date().toLocaleString();
  const {data:logs}=await supabase.from("logs").select("id").eq("user_id",user.id).eq("start_time",startIso).is("end_time",null).limit(1);
  if(logs&&logs.length){await supabase.from("logs").update({end_time}).eq("id",logs[0].id);}
  localStorage.removeItem("meri_clocked_in");
