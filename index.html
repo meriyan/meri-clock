@@ -176,13 +176,23 @@
       await supabase.from("social_checks").upsert({user_id:user.id,slot_time:slot,checked:cb.checked},{onConflict:"user_id,slot_time"});
     }
 
-    function tickClock(){
-      const n=new Date();
-      const h=pad(n.getHours()),m=pad(n.getMinutes()),s=pad(n.getSeconds());
-      renderDigits("hoursSeg",h);
-      renderDigits("minsSeg",m);
-      renderDigits("secsSeg",s);
-    }
+  function tickClock() {
+  const n = new Date();
+  const h = pad(n.getHours()), m = pad(n.getMinutes()), s = pad(n.getSeconds());
+
+  // ✅ Prevent duplicate flip layers by resetting the clock structure
+  document.querySelector('.clock').innerHTML = `
+    <div id="hoursSeg" class="segment"></div>
+    <div class="colon">:</div>
+    <div id="minsSeg" class="segment"></div>
+    <div class="colon">:</div>
+    <div id="secsSeg" class="segment"></div>
+  `;
+
+  renderDigits("hoursSeg", h);
+  renderDigits("minsSeg", m);
+  renderDigits("secsSeg", s);
+}
     function renderDigits(id,str){
       const seg=document.getElementById(id);
       if(!seg) return;
