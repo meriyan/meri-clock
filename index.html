@@ -293,11 +293,14 @@
         .lt('slot_time', to);
       if(error){ console.error(error); return; }
       const map = new Map();
-      data?.forEach(r=>{
-        const t = new Date(r.slot_time);
-        const label = `${pad(t.getHours())}:${pad(t.getMinutes())}`;
-        map.set(label, !!r.checked);
-      });
+      data?.forEach(r => {
+  // Convert UTC -> local time for display
+  const utc = new Date(r.slot_time);
+  const local = new Date(utc.getTime() + utc.getTimezoneOffset() * 60000);
+  const label = `${pad(local.getHours())}:${pad(local.getMinutes())}`;
+  map.set(label, !!r.checked);
+});
+
       // populate
       document.querySelectorAll('#slotsGrid input[type=checkbox]').forEach(cb=>{
         const lbl = cb.dataset.label;
