@@ -1,297 +1,222 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Meri — Focus Dashboard</title>
-
-  <style>
-    /* ====== BASE STYLING ====== */
-    :root {
-      --bg: #0b0c10;
-      --panel: #13161b;
-      --card: #14161a;
-      --text: #e8ecf1;
-      --accent: #7aa7ff;
-      --muted: #9aa3b2;
-      --good: #3dcc7b;
-      --warn: #ffc24d;
-      --danger: #ff6b6b;
-      --shadow: rgba(0, 0, 0, 0.4);
-    }
-    html, body {
-      height: 100%;
-      margin: 0;
-      background: var(--bg);
-      color: var(--text);
-      font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
-    }
-    .container {
-      min-height: 100%;
-      display: flex;
-      flex-direction: column;
-      gap: 18px;
-      align-items: center;
-      padding: 24px 20px 80px;
-    }
-    .grid {
-      width: 100%;
-      max-width: 1100px;
-      display: grid;
-      grid-template-columns: 1.1fr .9fr;
-      gap: 18px;
-    }
-    @media (max-width: 940px) { .grid { grid-template-columns: 1fr; } }
-
-    /* ====== BUTTONS & INPUTS ====== */
-    .btn, .chip {
-      background: var(--card);
-      color: var(--text);
-      border: 1px solid rgba(255,255,255,.06);
-      border-radius: 10px;
-      padding: 10px 14px;
-      box-shadow: 0 8px 24px var(--shadow);
-      cursor: pointer;
-      user-select: none;
-    }
-    .btn.primary { background: linear-gradient(180deg, var(--accent), #436cff); color: #fff; border: none; }
-    .btn.success { background: linear-gradient(180deg, var(--good), #1b8b52); color: #fff; border: none; }
-    .btn.warn { background: linear-gradient(180deg, var(--warn), #a37400); color: #fff; border: none; }
-    .btn.ghost { background: transparent; border: 1px dashed rgba(255,255,255,.18); }
-    .btn:disabled { opacity: .6; cursor: not-allowed; }
-
-    .form input, .form textarea, .form select {
-      background: var(--panel);
-      color: var(--text);
-      border: 1px solid rgba(255,255,255,.06);
-      border-radius: 10px;
-      padding: 10px 12px;
-      outline: none;
-      min-width: 160px;
-    }
-
-    /* ====== CARD LAYOUT ====== */
-    .card {
-      background: var(--card);
-      border: 1px solid rgba(255,255,255,.06);
-      border-radius: 14px;
-      box-shadow: 0 16px 40px var(--shadow);
-      padding: 18px;
-    }
-    .section-title {
-      font-weight: 700;
-      letter-spacing: .04em;
-      text-transform: uppercase;
-      font-size: 12px;
-      color: var(--muted);
-      margin: 0 0 12px;
-    }
-    .clock { display: flex; gap: 16px; align-items: center; justify-content: center; }
-    .digit { font-size: 68px; font-weight: 800; }
-
-    .footer {
-      position: fixed;
-      bottom: 10px;
-      left: 0;
-      right: 0;
-      display: flex;
-      justify-content: center;
-      color: var(--muted);
-      font-size: 12px;
-    }
-    .footer strong { color: var(--text); }
-
-    /* ====== FOCUS ZONE ====== */
-    .slot {
-      background: var(--panel);
-      border: 1px solid rgba(255,255,255,.08);
-      border-radius: 10px;
-      padding: 10px 12px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 8px;
-    }
-    .slot.disabled { opacity: .45; }
-    .slot .meta { font-size: 12px; color: var(--muted); }
-  </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>MeriV Productivity</title>
+<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+<style>
+  body {
+    font-family: "Poppins", sans-serif;
+    background-color: #0d1117;
+    color: #e6edf3;
+    margin: 0;
+    padding: 20px;
+  }
+  .container {
+    max-width: 900px;
+    margin: auto;
+  }
+  .section {
+    background-color: #161b22;
+    border-radius: 10px;
+    padding: 20px;
+    margin-top: 20px;
+  }
+  h2 {
+    color: #58a6ff;
+    margin-top: 0;
+  }
+  input, select, textarea, button {
+    border-radius: 5px;
+    border: none;
+    padding: 8px 10px;
+    margin: 5px 0;
+  }
+  button {
+    background-color: #238636;
+    color: white;
+    cursor: pointer;
+  }
+  button:hover {
+    background-color: #2ea043;
+  }
+  .clock {
+    font-size: 40px;
+    text-align: center;
+    letter-spacing: 2px;
+  }
+  .checkbox-grid {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 6px;
+  }
+  .checkbox-item {
+    background-color: #21262d;
+    border-radius: 5px;
+    padding: 5px;
+    text-align: center;
+  }
+</style>
 </head>
-
 <body>
-  <div class="container">
+<div class="container">
+  <h2>Flip Clock</h2>
+  <div id="flipClock" class="clock"></div>
 
-    <!-- AUTH -->
-    <div id="authSection" class="card">
-      <div class="section-title">Log in or Sign up</div>
-      <form id="authForm">
-        <input type="email" id="authEmail" placeholder="Email" required />
-        <input type="password" id="authPassword" placeholder="Password" required />
-        <button class="btn primary" type="submit">Continue</button>
-      </form>
-    </div>
-
-    <!-- MAIN APP -->
-    <div id="mainApp" style="display:none;">
-      <div class="controls">
-        <button id="logoutBtn" class="btn ghost">Log out</button>
-      </div>
-
-      <div class="grid">
-        <!-- FLIP CLOCK -->
-        <div class="card">
-          <div class="section-title">Flip Clock</div>
-          <div id="clockDisplay" class="clock"></div>
-        </div>
-
-        <!-- CLOCK IN/OUT -->
-        <div class="card">
-          <div class="section-title">Clock In / Clock Out</div>
-          <form class="form" id="logForm" onsubmit="return false;">
-            <input type="text" id="activity" placeholder="What are you doing?" required />
-            <select id="category">
-              <option value="">No tag</option>
-              <option>Study</option>
-              <option>Work</option>
-              <option>Gym</option>
-              <option>Deep Work</option>
-              <option>Content</option>
-              <option>Admin</option>
-            </select>
-            <textarea id="notes" placeholder="Notes (optional)"></textarea>
-            <button id="clockInBtn" class="btn success" type="button">Clock In</button>
-            <button id="clockOutBtn" class="btn warn" type="button" disabled>Clock Out</button>
-          </form>
-        </div>
-      </div>
-
-      <!-- FOCUS ZONE (Social + Creator Tracker) -->
-      <div class="card" style="width:100%; max-width:1100px;">
-        <div class="section-title">Focus Zone — Social & Creator Tracker</div>
-
-        <div style="margin-bottom:10px;">
-          <button id="smStartBtn" class="btn success">Start Social Session</button>
-          <button id="smStopBtn" class="btn warn" disabled>Stop Session</button>
-          <button id="creatorWithBtn" class="btn primary">Start Creator (With Social)</button>
-          <button id="creatorWithoutBtn" class="btn ghost">Start Creator (No Social)</button>
-          <span id="focusStatus" style="color:var(--muted); margin-left:10px;">No active session.</span>
-        </div>
-
-        <div style="margin:6px 0 10px;">
-          <strong>Today's 30-Minute Checkboxes</strong> — tick ✅ if you stayed off social:
-        </div>
-        <div id="slotsGrid" style="display:grid; grid-template-columns:repeat(auto-fill,minmax(160px,1fr)); gap:8px;"></div>
-      </div>
-
-      <div class="card" style="width:100%; max-width:1100px;">
-        <div class="section-title">Entries</div>
-        <table id="entriesTable" style="width:100%;">
-          <thead><tr><th>Date</th><th>Start</th><th>End</th><th>Activity</th><th>Tag</th><th>Notes</th></tr></thead>
-          <tbody id="entriesBody"></tbody>
-        </table>
-      </div>
-    </div>
-
-    <div class="footer">Made for <strong>Meri</strong> — focused, evolving, unstoppable 💫</div>
+  <div class="section" id="clockSection">
+    <h2>Clock In / Clock Out</h2>
+    <input id="activity" type="text" placeholder="What are you doing?" />
+    <input id="tag" type="text" placeholder="Tag (optional)" />
+    <textarea id="notes" placeholder="Notes (optional)"></textarea><br>
+    <button id="clockIn">Clock In</button>
+    <button id="clockOut">Clock Out</button>
   </div>
 
-  <!-- ====== SCRIPT ====== -->
-  <script type="module">
-    import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+  <div class="section" id="creatorZone">
+    <h2>Creator Zone</h2>
+    <button id="startCreatorWith">Start Creator (With Social)</button>
+    <button id="startCreatorWithout">Start Creator (No Social)</button>
+    <button id="stopCreator">Stop Session</button>
+    <div id="creatorStatus">No active session.</div>
+  </div>
 
-    const SUPABASE_URL = "https://eqqunclfxzmfosjwzwki.supabase.co";
-    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVxcXVuY2xmeHptZm9zand6d2tpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjE5NDg1MDQsImV4cCI6MjA3NzUyNDUwNH0.1N5pYTxFf6PjCMgQ0nUICsc9jLL58LuDZgX_s8yLe_w"; // replace with your actual anon key
-    const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  <div class="section" id="checkboxes">
+    <h2>Today's 30-Minute Checkboxes</h2>
+    <div class="checkbox-grid" id="checkboxGrid"></div>
+  </div>
+</div>
 
-    /* ====== CLOCK ====== */
-    function startClock() {
-      const el = document.getElementById("clockDisplay");
-      setInterval(() => {
-        const now = new Date();
-        el.textContent = now.toLocaleTimeString();
-      }, 1000);
-    }
+<script>
+const { createClient } = supabase;
+const supabaseUrl = "YOUR_SUPABASE_URL";
+const supabaseKey = "YOUR_SUPABASE_ANON_KEY";
+const supabaseClient = createClient(supabaseUrl, supabaseKey);
 
-    /* ====== AUTH ====== */
-    async function handleAuth(event) {
-      event.preventDefault();
-      const email = document.getElementById("authEmail").value;
-      const password = document.getElementById("authPassword").value;
-      let { error } = await supabase.auth.signInWithPassword({ email, password });
-      if (error) {
-        let { error: signUpError } = await supabase.auth.signUp({ email, password });
-        if (signUpError) return alert("Auth error: " + signUpError.message);
-        alert("Signup successful!");
-      } else alert("Login successful!");
-      setupAfterLogin();
-    }
+// Update live clock
+function updateClock() {
+  document.getElementById("flipClock").innerText =
+    new Date().toLocaleTimeString();
+}
+setInterval(updateClock, 1000);
+updateClock();
 
-    async function setupAfterLogin() {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
-      document.getElementById("authSection").style.display = "none";
-      document.getElementById("mainApp").style.display = "block";
-      startClock();
-      loadEntries(user.id);
-      loadSocialChecks(user.id);
-    }
+let activeCreatorSession = null;
 
-    /* ====== LOG TRACKING ====== */
-    async function clockIn() {
-      const { data: { user } } = await supabase.auth.getUser();
-      const activity = document.getElementById("activity").value.trim();
-      const tag = document.getElementById("category").value;
-      const notes = document.getElementById("notes").value;
-      const start_time = new Date().toISOString();
-      await supabase.from("logs").insert([{ user_id: user.id, activity, tag, notes, start_time }]);
-      alert("Clocked in!");
-      loadEntries(user.id);
-    }
+// Clock in / out
+document.getElementById("clockIn").onclick = async () => {
+  const activity = document.getElementById("activity").value;
+  const tag = document.getElementById("tag").value;
+  const notes = document.getElementById("notes").value;
 
-    async function clockOut() {
-      const { data: { user } } = await supabase.auth.getUser();
-      const activity = document.getElementById("activity").value.trim();
-      await supabase.from("logs")
-        .update({ end_time: new Date().toISOString() })
-        .eq("user_id", user.id)
-        .eq("activity", activity)
-        .is("end_time", null);
-      alert("Clocked out!");
-      loadEntries(user.id);
-    }
+  await supabaseClient.from("logs").insert({
+    activity,
+    tag,
+    notes,
+    start_time: new Date().toISOString(),
+  });
+  alert("Clocked in successfully ✅");
+};
 
-    async function loadEntries(uid) {
-      const { data } = await supabase.from("logs").select("*").eq("user_id", uid).order("start_time", { ascending: false });
-      const tbody = document.getElementById("entriesBody");
-      tbody.innerHTML = "";
-      data.forEach(r => {
-        const tr = document.createElement("tr");
-        tr.innerHTML = `<td>${new Date(r.start_time).toLocaleDateString()}</td>
-                        <td>${new Date(r.start_time).toLocaleTimeString()}</td>
-                        <td>${r.end_time ? new Date(r.end_time).toLocaleTimeString() : "—"}</td>
-                        <td>${r.activity}</td><td>${r.tag}</td><td>${r.notes}</td>`;
-        tbody.appendChild(tr);
+document.getElementById("clockOut").onclick = async () => {
+  const { data } = await supabaseClient
+    .from("logs")
+    .select("*")
+    .order("id", { ascending: false })
+    .limit(1);
+  if (data && data.length > 0) {
+    await supabaseClient
+      .from("logs")
+      .update({ end_time: new Date().toISOString() })
+      .eq("id", data[0].id);
+    alert("Clocked out ✅");
+  }
+};
+
+// Creator sessions
+document.getElementById("startCreatorWith").onclick = async () => {
+  if (activeCreatorSession) return;
+  const { data, error } = await supabaseClient.from("social_sessions").insert({
+    type: "creator_with",
+    start_time: new Date().toISOString(),
+  });
+  if (!error) {
+    activeCreatorSession = true;
+    document.getElementById("creatorStatus").innerText =
+      "Creator session started (with social).";
+  }
+};
+
+document.getElementById("startCreatorWithout").onclick = async () => {
+  if (activeCreatorSession) return;
+  const { data, error } = await supabaseClient.from("social_sessions").insert({
+    type: "creator_without",
+    start_time: new Date().toISOString(),
+  });
+  if (!error) {
+    activeCreatorSession = true;
+    document.getElementById("creatorStatus").innerText =
+      "Creator session started (no social).";
+  }
+};
+
+document.getElementById("stopCreator").onclick = async () => {
+  if (!activeCreatorSession) return;
+  const { data } = await supabaseClient
+    .from("social_sessions")
+    .select("*")
+    .order("id", { ascending: false })
+    .limit(1);
+  if (data && data.length > 0) {
+    await supabaseClient
+      .from("social_sessions")
+      .update({ end_time: new Date().toISOString() })
+      .eq("id", data[0].id);
+  }
+  activeCreatorSession = null;
+  document.getElementById("creatorStatus").innerText = "No active session.";
+};
+
+// 30-minute checkbox system
+const grid = document.getElementById("checkboxGrid");
+const times = [];
+for (let h = 0; h < 24; h++) {
+  for (let m = 0; m < 60; m += 30) {
+    const t = `${h.toString().padStart(2, "0")}:${m
+      .toString()
+      .padStart(2, "0")}`;
+    times.push(t);
+  }
+}
+
+async function loadCheckboxes() {
+  const today = new Date().toISOString().split("T")[0];
+  const { data } = await supabaseClient
+    .from("social_checks")
+    .select("*")
+    .eq("date", today);
+  grid.innerHTML = "";
+  times.forEach((time) => {
+    const box = document.createElement("input");
+    box.type = "checkbox";
+    const found = data?.find((x) => x.time_slot === time);
+    if (found && found.checked) box.checked = true;
+    box.onchange = async () => {
+      await supabaseClient.from("social_checks").upsert({
+        date: today,
+        time_slot: time,
+        checked: box.checked,
       });
-    }
+    };
+    const div = document.createElement("div");
+    div.className = "checkbox-item";
+    div.textContent = time;
+    div.appendChild(box);
+    grid.appendChild(div);
+  });
+}
 
-    /* ====== FOCUS ZONE ====== */
-    // Generates 30-min slots and saves check status
-    async function loadSocialChecks(uid) {
-      const grid = document.getElementById("slotsGrid");
-      grid.innerHTML = "";
-      for (let i = 0; i < 24 * 2; i++) {
-        const div = document.createElement("div");
-        const label = `${String(Math.floor(i/2)).padStart(2,"0")}:${i%2 ? "30" : "00"}`;
-        div.className = "slot";
-        div.innerHTML = `<span class="meta">${label}</span><input type="checkbox" data-time="${label}" />`;
-        grid.appendChild(div);
-      }
-      // Load existing from DB (optional future extension)
-    }
-
-    document.getElementById("authForm").addEventListener("submit", handleAuth);
-    document.getElementById("clockInBtn").addEventListener("click", clockIn);
-    document.getElementById("clockOutBtn").addEventListener("click", clockOut);
-    document.getElementById("logoutBtn").addEventListener("click", async () => { await supabase.auth.signOut(); location.reload(); });
-  </script>
+loadCheckboxes();
+</script>
 </body>
 </html>
