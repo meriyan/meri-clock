@@ -4,7 +4,8 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Meri — Daily Tracker</title>
-  <style>
+  
+    <style>
     :root {
       --bg:#0b0c10; --panel:#13161b; --card:#14161a; --text:#e8ecf1; --accent:#7aa7ff;
       --muted:#9aa3b2; --good:#3dcc7b; --warn:#ffc24d; --danger:#ff6b6b; --shadow:rgba(0,0,0,.4);
@@ -13,16 +14,20 @@
       font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;}
     .container {min-height:100%;display:flex;flex-direction:column;align-items:center;padding:24px 20px 80px;}
     .card {background:var(--card);border:1px solid rgba(255,255,255,.06);border-radius:14px;
-      box-shadow:0 16px 40px var(--shadow);padding:18px;max-width:1100px;width:100%;}
+      box-shadow:0 16px 40px var(--shadow);padding:18px;max-width:1100px;width:100%;margin-top:20px;}
     .section-title {font-weight:700;letter-spacing:.04em;text-transform:uppercase;
       font-size:12px;color:var(--muted);margin:0 0 12px;}
     .controls {display:flex;gap:12px;flex-wrap:wrap;align-items:center;justify-content:center;}
     .btn {background:var(--card);color:var(--text);border:1px solid rgba(255,255,255,.06);
-      border-radius:10px;padding:10px 14px;box-shadow:0 8px 24px var(--shadow);cursor:pointer;user-select:none;}
+      border-radius:10px;padding:10px 14px;box-shadow:0 8px 24px var(--shadow);cursor:pointer;user-select:none;
+      transition: background-color 0.2s;}
+    /* Added hover effect for better feedback */
+    .btn:hover:not(:disabled) { background-color: rgba(255, 255, 255, 0.1); }
     .btn.primary {background:linear-gradient(180deg, var(--accent), #436cff);color:white;border-color:transparent;}
     .btn.success {background:linear-gradient(180deg, var(--good), #1b8b52);color:white;border-color:transparent;}
     .btn.warn {background:linear-gradient(180deg, var(--warn), #a37400);color:white;border-color:transparent;}
     .btn.ghost {background:transparent;border:1px dashed rgba(255,255,255,.18);}
+    .btn:disabled {opacity: 0.5; cursor: not-allowed;}
     .date-selector {display:flex;flex-direction:column;gap:12px;align-items:center;}
     .year-box,.month-box {background:var(--panel);border-radius:10px;padding:10px 16px;width:100%;max-width:400px;cursor:pointer;}
     .days-grid {display:grid;grid-template-columns:repeat(auto-fill,minmax(80px,1fr));gap:8px;width:100%;max-width:400px;margin-top:6px;}
@@ -38,17 +43,20 @@
     .top {top:0;border-bottom:1px solid rgba(0,0,0,.35);}
     .bottom {bottom:0;}
     .digit {font-size:68px;}
-    table {width:100%;border-collapse:separate;border-spacing:0;}
+    table {width:100%;border-collapse:separate;border-spacing:0;margin-top:10px;}
     th,td {padding:10px 12px;text-align:left;border-bottom:1px solid rgba(255,255,255,.08);}
     thead th {font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);}
     .form {display:flex;gap:10px;flex-wrap:wrap;align-items:center;}
     .form input,.form select,.form textarea {background:var(--panel);color:var(--text);
-      border:1px solid rgba(255,255,255,.06);border-radius:10px;padding:10px 12px;outline:none;}
+      border:1px solid rgba(255,255,255,.06);border-radius:10px;padding:10px 12px;outline:none;
+      flex-grow: 1; min-width: 150px;}
     .mini-timer {font-weight:800;font-variant-numeric:tabular-nums;}
     .slot {display:flex;align-items:center;justify-content:space-between;background:var(--panel);padding:8px 12px;border-radius:8px;}
+    #notes { flex-basis: 100%; resize: vertical; min-height: 50px; }
+    #clockInStatus { font-weight: 600; }
   </style>
 
-  <script type="module">
+    <script type="module">
     import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
     // NOTE: These keys are placeholder public keys for this demo structure
     const SUPABASE_URL="https://eqqunclfxzmfosjwzwki.supabase.co";
@@ -158,10 +166,15 @@
         const totalSeconds = Math.floor(ms / 1000);
         const hours = Math.floor(totalSeconds / 3600);
         const minutes = Math.floor((totalSeconds % 3600) / 60);
-        const seconds = totalSeconds % 60;
+        // Include seconds for a more precise live timer effect
+        const seconds = totalSeconds % 60; 
+
         let output = "";
         if (hours > 0) output += `${hours}h `;
-        output += `${minutes}m`;
+        output += `${pad(minutes)}m`;
+        // Only show seconds if the duration is very short or needed for live display
+        if (totalSeconds < 3600 && hours === 0) output += ` ${pad(seconds)}s`;
+        
         return output.trim();
     }
 
@@ -196,13 +209,12 @@
       await supabase.from("social_checks").upsert({user_id:user.id,slot_time:slot,checked:cb.checked},{onConflict:"user_id,slot_time"});
     }
 
-    // Fix for the duplicate clock issue: The clock elements are now generated *only* here.
+    // Renders the flip clock
     function tickClock() {
       const n = new Date();
       const h = pad(n.getHours()), m = pad(n.getMinutes()), s = pad(n.getSeconds());
 
-      // 1. Clear and recreate the clock structure (this is essential when the HTML structure is empty)
-      //    This prevents duplication by overwriting the entire content every second.
+      // Clear and recreate the clock structure
       document.querySelector('.clock').innerHTML = `
         <div id="hoursSeg" class="segment"></div>
         <div class="colon">:</div>
@@ -211,7 +223,7 @@
         <div id="secsSeg" class="segment"></div>
       `;
 
-      // 2. Render the digits into the newly created segments
+      // Render the digits into the newly created segments
       renderDigits("hoursSeg", h);
       renderDigits("minsSeg", m);
       renderDigits("secsSeg", s);
@@ -261,8 +273,6 @@
         const notes = localStorage.getItem("meri_clocked_in_notes");
 
         // Find the last open log entry and update it
-        const d = new Date(clockedInTime);
-        const from = startOfDayUtc(d).toISOString();
         const { data: logs, error: selectError } = await supabase.from("logs")
             .select("id")
             .eq("user_id", user.id)
@@ -289,25 +299,43 @@
         await loadEntries(user.id); // Reload table
         alert("Clocked Out!");
     }
+    
+    // Function to update the clock-in status message and timer every second
+    function updateClockInTimer(startTime) {
+        const elapsedMs = new Date().getTime() - new Date(startTime).getTime();
+        const durationText = formatDuration(elapsedMs);
+        const activity = localStorage.getItem("meri_clocked_in_activity");
+        const statusText = `Clocked In to: **${activity}** | Duration: **${durationText}**`;
+        document.querySelector('#clockInStatus').innerHTML = statusText;
+    }
 
     function checkClockInStatus(uid) {
         const isClockedIn = localStorage.getItem("meri_clocked_in");
         document.getElementById("clockInBtn").disabled = !!isClockedIn;
         document.getElementById("clockOutBtn").disabled = !isClockedIn;
+        
+        // Restore input fields
         document.getElementById("activity").value = localStorage.getItem("meri_clocked_in_activity") || '';
         document.getElementById("category").value = localStorage.getItem("meri_clocked_in_tag") || '';
         document.getElementById("notes").value = localStorage.getItem("meri_clocked_in_notes") || '';
 
         if (isClockedIn) {
+            // Disable input fields while clocked in
+            document.getElementById("activity").disabled = true;
+            document.getElementById("category").disabled = true;
+            document.getElementById("notes").disabled = true;
+            
             if (!clockInInterval) {
-                clockInInterval = setInterval(() => {
-                    // Update current entry display
-                    const activity = localStorage.getItem("meri_clocked_in_activity");
-                    const statusText = `Clocked In to: **${activity}** at ${new Date(isClockedIn).toLocaleTimeString()}`;
-                    document.querySelector('#clockInStatus').innerHTML = statusText;
-                }, 1000);
+                // Initial update and start interval
+                updateClockInTimer(isClockedIn);
+                clockInInterval = setInterval(() => updateClockInTimer(isClockedIn), 1000);
             }
         } else {
+            // Enable input fields when clocked out
+            document.getElementById("activity").disabled = false;
+            document.getElementById("category").disabled = false;
+            document.getElementById("notes").disabled = false;
+
             if (clockInInterval) {
                 clearInterval(clockInInterval);
                 clockInInterval = null;
@@ -336,7 +364,7 @@
         document.getElementById("creatorNoBtn").disabled = true;
         document.getElementById("creatorStopBtn").disabled = false;
         
-        document.getElementById("creatorStatus").textContent = `Session Active: ${type}`;
+        document.getElementById("creatorStatus").textContent = `Session Active: ${type === 'social' ? 'With Social' : 'No Social'}`;
         
         creatorSessionInterval = setInterval(updateMiniTimer, 1000);
         updateMiniTimer();
@@ -349,11 +377,12 @@
         
         const type = localStorage.getItem("meri_creator_session_type");
         const start = localStorage.getItem("meri_creator_session_start");
+        const end = new Date().toISOString();
         
         // Log the session as a "Work" log entry
         const user = await getCurrentUser();
         if (user && start) {
-            const end = new Date().toISOString();
+            
             const activity = `Creator Session (${type === 'social' ? 'With Social' : 'No Social'})`;
             const tag = 'Deep Work';
             await supabase.from("logs").insert({ 
@@ -453,17 +482,17 @@
     <div id="mainApp">
       <div class="controls">
         <button id="logoutBtn" class="btn ghost">Log out</button>
-        <button id="exportBtn" class="btn primary">Export CSV (Pending)</button>
-        <button id="clearBtn" class="btn ghost">Clear All (Pending)</button>
+        <button id="exportBtn" class="btn primary" disabled>Export CSV (Pending)</button>
+        <button id="clearBtn" class="btn ghost" disabled>Clear All (Pending)</button>
       </div>
 
       <h2 id="selectedDateHeader" style="text-align:center;margin-top:10px;"></h2>
 
             <div class="card">
         <div class="section-title">Flip Clock</div>
-                <div class="clock"></div>
+        <div class="clock"></div>
       </div>
-
+---
             <div class="card">
         <div class="section-title">Clock In / Clock Out</div>
         <form class="form" onsubmit="return false;">
@@ -483,7 +512,7 @@
         </form>
         <div id="clockInStatus" style="margin-top:10px; color:var(--muted);">Not currently clocked in.</div>
       </div>
-
+---
   <div class="card">
   <div class="section-title">Entries</div>
   <table>
@@ -492,7 +521,8 @@
         <th>Date</th>
         <th>Start</th>
         <th>End</th>
-        <th>Duration</th>         <th>Activity</th>
+        <th>Duration</th>
+        <th>Activity</th>
         <th>Tag</th>
         <th>Notes</th>
       </tr>
@@ -501,7 +531,7 @@
           </tbody>
   </table>
 </div>
-
+---
 <div class="card">
   <div class="section-title">Focus Zone — Creator Sessions & 30-min Checks</div>
   <div class="form" style="align-items:center;">
@@ -511,7 +541,7 @@
     <span style="margin-left:10px;">Session Timer: <span id="miniTimer" class="mini-timer">00:00</span></span>
   </div>
 
-  <div class="status" id="creatorStatus" style="margin-top:6px;">No active session.</div>
+  <div class="status" id="creatorStatus" style="margin-top:6px; color:var(--muted); font-style: italic;">No active session.</div>
 
   <div id="slotsGrid"
        style="display:grid;
