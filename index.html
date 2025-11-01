@@ -233,41 +233,7 @@
     function escapeHtml(s = "") {
       return s.replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
     }
-
-    // Flip Clock logic
-    function updateClock() {
-      const now = new Date();
-      const h = String(now.getHours()).padStart(2, "0");
-      const m = String(now.getMinutes()).padStart(2, "0");
-      const s = String(now.getSeconds()).padStart(2, "0");
-      document.getElementById("clockDisplay").innerHTML = `
-        <span class="digit">${h}</span> : 
-        <span class="digit">${m}</span> : 
-        <span class="digit">${s}</span>`;
-    }
-    setInterval(updateClock, 1000);
-    updateClock();
-
-    async function setupAfterLogin() {
-      const user = await getCurrentUser();
-      if (!user) return;
-      document.getElementById("authSection").style.display = "none";
-      document.getElementById("mainApp").style.display = "block";
-      loadEntriesFromDB(user.id);
-      updateClockButtons(false);
-    }
-
-    window.addEventListener("DOMContentLoaded", async () => {
-      document.getElementById("mainApp").style.display = "none";
-      document.getElementById("authForm").addEventListener("submit", handleAuth);
-      document.getElementById("logoutBtn").addEventListener("click", handleLogout);
-      document.getElementById("clockInBtn").addEventListener("click", clockIn);
-      document.getElementById("clockOutBtn").addEventListener("click", clockOut);
-
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session?.user) setupAfterLogin();
-    })
-      eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVxcXVuY2xmeHptZm9zand6d2tpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjE5NDg1MDQsImV4cCI6MjA3NzUyNDUwNH0.1N5pYTxFf6PjCMgQ0nUICsc9jLL58LuDZgX_s8yLe_w;
+I6MjA3NzUyNDUwNH0.1N5pYTxFf6PjCMgQ0nUICsc9jLL58LuDZgX_s8yLe_w;
   </script>
 </body>
 </html>
