@@ -269,6 +269,65 @@ tbody tr:hover {
         font-size: 40px;
     }
 }
+    /* --- Extra Styling Patch (non-destructive) --- */
+
+/* Fix the clock alignment */
+.clock {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 15px;
+  flex-wrap: nowrap;
+  margin-top: 10px;
+}
+
+/* Ensure flip segments align properly */
+.segment {
+  display: flex;
+  gap: 5px;
+}
+
+/* Improve date selector visibility */
+.date-selector {
+  background: var(--card);
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 0 20px var(--shadow);
+  text-align: center;
+  margin-top: 20px;
+}
+
+#dateSelector {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+}
+
+.year-box, .month-box, .day-btn {
+  background: var(--panel);
+  padding: 8px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.year-box:hover, .month-box:hover, .day-btn:hover {
+  background: var(--accent);
+  color: #fff;
+}
+
+/* Make “---” dividers invisible */
+body hr, body > div > div.card + --- {
+  display: none !important;
+}
+
+/* Fix button width on smaller devices */
+@media (max-width: 600px) {
+  .btn {
+    width: 100%;
+  }
+}
   </style>
   
   <script type="module">
