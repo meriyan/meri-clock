@@ -5,54 +5,254 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Meri — Daily Tracker</title>
   
-        <style>
-    :root {
-      --bg:#0b0c10; --panel:#13161b; --card:#14161a; --text:#e8ecf1; --accent:#7aa7ff;
-      --muted:#9aa3b2; --good:#3dcc7b; --warn:#ffc24d; --danger:#ff6b6b; --shadow:rgba(0,0,0,.4);
-    }
-    html,body {height:100%;margin:0;background:var(--bg);color:var(--text);
-      font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;}
-    .container {min-height:100%;display:flex;flex-direction:column;align-items:center;padding:24px 20px 80px;}
-    .card {background:var(--card);border:1px solid rgba(255,255,255,.06);border-radius:14px;
-      box-shadow:0 16px 40px var(--shadow);padding:18px;max-width:1100px;width:100%;margin-top:20px;}
-    .section-title {font-weight:700;letter-spacing:.04em;text-transform:uppercase;
-      font-size:12px;color:var(--muted);margin:0 0 12px;}
-    .controls {display:flex;gap:12px;flex-wrap:wrap;align-items:center;justify-content:center;}
-    .btn {background:var(--card);color:var(--text);border:1px solid rgba(255,255,255,.06);
-      border-radius:10px;padding:10px 14px;box-shadow:0 8px 24px var(--shadow);cursor:pointer;user-select:none;
-      transition: background-color 0.2s;}
-    .btn:hover:not(:disabled) { background-color: rgba(255, 255, 255, 0.1); }
-    .btn.primary {background:linear-gradient(180deg, var(--accent), #436cff);color:white;border-color:transparent;}
-    .btn.success {background:linear-gradient(180deg, var(--good), #1b8b52);color:white;border-color:transparent;}
-    .btn.warn {background:linear-gradient(180deg, var(--warn), #a37400);color:white;border-color:transparent;}
-    .btn.ghost {background:transparent;border:1px dashed rgba(255,255,255,.18);}
-    .btn:disabled {opacity: 0.5; cursor: not-allowed;}
-    .date-selector {display:flex;flex-direction:column;gap:12px;align-items:center;}
-    .year-box,.month-box {background:var(--panel);border-radius:10px;padding:10px 16px;width:100%;max-width:400px;cursor:pointer;}
-    .days-grid {display:grid;grid-template-columns:repeat(auto-fill,minmax(80px,1fr));gap:8px;width:100%;max-width:400px;margin-top:6px;}
-    .day-btn {background:var(--card);border:1px solid rgba(255,255,255,.08);border-radius:8px;padding:8px;text-align:center;cursor:pointer;transition:.2s;}
-    .day-btn:hover {background:var(--accent);color:white;}
-    .clock {display:flex;gap:16px;align-items:center;justify-content:center;flex-wrap:wrap;}
-    .segment {display:flex;gap:8px;}
-    .colon {font-weight:800;font-size:48px;opacity:.75;position:relative;top:-8px;}
-    .flip {position:relative;width:92px;height:120px;perspective:1000px;}
-    .card-face {position:relative;width:100%;height:100%;border-radius:14px;
-      background:linear-gradient(180deg, var(--card), #0f1116);border:1px solid rgba(255,255,255,.06);overflow:hidden;}
-    .half {position:absolute;left:0;right:0;height:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-variant-numeric:tabular-nums;}
-    .top {top:0;border-bottom:1px solid rgba(0,0,0,.35);}
-    .bottom {bottom:0;}
-    .digit {font-size:68px;}
-    table {width:100%;border-collapse:separate;border-spacing:0;margin-top:10px;}
-    th,td {padding:10px 12px;text-align:left;border-bottom:1px solid rgba(255,255,255,.08);}
-    thead th {font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);}
-    .form {display:flex;gap:10px;flex-wrap:wrap;align-items:center;}
-    .form input,.form select,.form textarea {background:var(--panel);color:var(--text);
-      border:1px solid rgba(255,255,255,.06);border-radius:10px;padding:10px 12px;outline:none;
-      flex-grow: 1; min-width: 150px;}
-    .mini-timer {font-weight:800;font-variant-numeric:tabular-nums;}
-    .slot {display:flex;align-items:center;justify-content:space-between;background:var(--panel);padding:8px 12px;border-radius:8px;}
-    #notes { flex-basis: 100%; resize: vertical; min-height: 50px; }
-    #clockInStatus { font-weight: 600; }
+  <style>
+/* Define the color scheme for a sleek dark mode */
+:root {
+    --bg: #0d1117; 
+    --panel: #161b22; 
+    --card: #1f252d; 
+    --text: #c9d1d9; 
+    --accent: #58a6ff; /* A bright, modern blue */
+    --muted: #8b949e; 
+    --good: #3fb950; 
+    --warn: #d29922; 
+    --danger: #f85149; 
+    --shadow: rgba(0,0,0,0.5); /* Stronger shadow for depth */
+}
+
+/* Base styles for a clean page */
+html, body {
+    height: 100%;
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-size: 16px;
+}
+
+/* Main content wrapper */
+.container {
+    min-height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 30px 20px 80px;
+}
+
+/* Card/Panel Styling (The Modern Look) */
+.card {
+    background: var(--card);
+    border: 1px solid var(--panel);
+    border-radius: 16px; /* Slightly rounded corners */
+    box-shadow: 0 10px 30px var(--shadow); /* Lifted appearance */
+    padding: 20px;
+    max-width: 1000px;
+    width: 100%;
+    margin-top: 25px;
+    transition: transform 0.2s;
+}
+
+/* Titles and Headers */
+.section-title {
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    font-size: 14px;
+    color: var(--accent); /* Highlight key sections */
+    margin: 0 0 15px;
+    border-bottom: 2px solid var(--panel);
+    padding-bottom: 8px;
+}
+h2 {
+    color: var(--text);
+    font-weight: 600;
+}
+
+/* Button & Control Styling */
+.controls {
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+}
+.btn {
+    background: var(--panel);
+    color: var(--text);
+    border: none;
+    border-radius: 8px;
+    padding: 12px 18px;
+    font-weight: 500;
+    cursor: pointer;
+    user-select: none;
+    transition: all 0.2s ease;
+}
+.btn:hover:not(:disabled) { 
+    background-color: var(--card);
+    box-shadow: 0 0 0 2px var(--accent); /* Subtle glow on hover */
+}
+.btn.primary {
+    background: var(--accent);
+    color: #fff;
+}
+.btn.success {
+    background: var(--good);
+    color: #fff;
+}
+.btn.warn {
+    background: var(--warn);
+    color: var(--bg);
+}
+.btn.ghost {
+    background: transparent;
+    border: 1px solid var(--muted);
+}
+.btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+/* Forms and Inputs */
+.form {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    align-items: center;
+}
+.form input, .form select, .form textarea {
+    background: var(--panel);
+    color: var(--text);
+    border: 1px solid #30363d;
+    border-radius: 8px;
+    padding: 10px 12px;
+    outline: none;
+    flex-grow: 1;
+    min-width: 150px;
+    transition: border-color 0.2s;
+}
+.form input:focus, .form select:focus, .form textarea:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 1px var(--accent);
+}
+#notes { 
+    flex-basis: 100%; 
+    resize: vertical; 
+    min-height: 80px; 
+}
+#clockInStatus { 
+    font-weight: 600; 
+    color: var(--good); 
+    font-size: 1em;
+    margin-top: 15px;
+    padding: 8px;
+    background: rgba(63, 185, 80, 0.1);
+    border-radius: 8px;
+}
+
+/* Clock Styling (The most complex part) */
+.clock {
+    display: flex;
+    gap: 20px;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin: 10px 0;
+}
+.colon {
+    font-weight: 800;
+    font-size: 56px;
+    color: var(--muted);
+    position: relative;
+    top: -10px;
+}
+.flip {
+    position: relative;
+    width: 80px; /* Adjusted size for segment */
+    height: 100px; /* Adjusted size for segment */
+    perspective: 1000px;
+}
+.card-face {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    border-radius: 12px;
+    background: linear-gradient(180deg, var(--card), #12161b);
+    border: 1px solid var(--panel);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+    overflow: hidden;
+}
+.digit {
+    font-size: 60px; /* Slightly smaller digit */
+    font-weight: 700;
+    color: var(--accent);
+}
+.half {
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-variant-numeric: tabular-nums;
+}
+.top {
+    top: 0;
+    border-bottom: 1px solid rgba(0,0,0,0.35);
+}
+.bottom {
+    bottom: 0;
+}
+
+/* Data Tables */
+table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    margin-top: 15px;
+    font-size: 0.9em;
+}
+th, td {
+    padding: 12px 10px;
+    text-align: left;
+    border-bottom: 1px solid #30363d;
+}
+thead th {
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+}
+tbody tr:last-child td {
+    border-bottom: none;
+}
+tbody tr:hover {
+    background-color: rgba(90, 166, 255, 0.05);
+}
+
+/* Focus Zone / Checkboxes */
+.mini-timer {
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+    color: var(--accent);
+}
+.slot {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--panel);
+    padding: 10px 12px;
+    border-radius: 6px;
+    transition: background-color 0.2s;
+}
+.slot:hover {
+    background: #262e38;
+}
+
+/* Responsive adjustments */
+@media (max-width: 600px) {
+    .container {
+        padding: 1
   </style>
           <script type="module">
     import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
