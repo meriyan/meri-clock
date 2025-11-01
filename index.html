@@ -6,7 +6,10 @@
   <title>Meri — Flip Clock + Time Logger</title>
 
   <style>
-    :root{ --bg:#0b0c10; --panel:#13161b; --card:#14161a; --text:#e8ecf1; --accent:#7aa7ff; --muted:#9aa3b2; --good:#3dcc7b; --warn:#ffc24d; --danger:#ff6b6b; --shadow:rgba(0,0,0,.4); }
+    :root {
+      --bg:#0b0c10; --panel:#13161b; --card:#14161a; --text:#e8ecf1; --accent:#7aa7ff; 
+      --muted:#9aa3b2; --good:#3dcc7b; --warn:#ffc24d; --danger:#ff6b6b; --shadow:rgba(0,0,0,.4);
+    }
     html,body{height:100%;margin:0;background:var(--bg);color:var(--text);
       font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
     }
@@ -15,23 +18,26 @@
     @media (max-width:940px){ .grid{ grid-template-columns:1fr; } }
 
     .controls{ display:flex; gap:12px; flex-wrap:wrap; align-items:center; justify-content:center; }
-    .chip, .btn{ background:var(--card); color:var(--text); border:1px solid rgba(255,255,255,.06); border-radius:10px; padding:10px 14px; box-shadow:0 8px 24px var(--shadow); cursor:pointer; user-select:none; }
-    .btn.primary{ border-color: transparent; background:linear-gradient(180deg, var(--accent), #436cff); color:white; }
-    .btn.success{ background:linear-gradient(180deg, var(--good), #1b8b52); color:white; border-color:transparent; }
-    .btn.warn{ background:linear-gradient(180deg, var(--warn), #a37400); color:white; border-color:transparent; }
+    .btn{ background:var(--card); color:var(--text); border:1px solid rgba(255,255,255,.06);
+      border-radius:10px; padding:10px 14px; box-shadow:0 8px 24px var(--shadow); cursor:pointer;
+    }
+    .btn.primary{ background:linear-gradient(180deg, var(--accent), #436cff); color:white; border:none; }
+    .btn.success{ background:linear-gradient(180deg, var(--good), #1b8b52); color:white; border:none; }
+    .btn.warn{ background:linear-gradient(180deg, var(--warn), #a37400); color:white; border:none; }
     .btn.ghost{ background:transparent; border:1px dashed rgba(255,255,255,.18); }
     .btn:disabled{ opacity:.6; cursor:not-allowed; }
 
-    .card{ background:var(--card); border:1px solid rgba(255,255,255,.06); border-radius:14px; box-shadow:0 16px 40px var(--shadow); padding:18px; }
+    .card{ background:var(--card); border:1px solid rgba(255,255,255,.06);
+      border-radius:14px; box-shadow:0 16px 40px var(--shadow); padding:18px;
+    }
     .section-title{ font-weight:700; letter-spacing:.04em; text-transform:uppercase; font-size:12px; color:var(--muted); margin:0 0 12px; }
-    .date-line{ text-align:center; color:var(--muted); margin-top:4px; }
-
-    .clock{ display:flex; gap:16px; align-items:center; justify-content:center; flex-wrap:wrap; }
-    .digit{ font-size:68px; font-weight:800; }
+    .clock{ display:flex; gap:16px; align-items:center; justify-content:center; flex-wrap:wrap; font-size:64px; font-weight:700; }
 
     .form{ display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
-    .form input, .form textarea, .form select{ background:var(--panel); color:var(--text); border:1px solid rgba(255,255,255,.06); border-radius:10px; padding:10px 12px; outline:none; min-width:160px; }
-    .form textarea{ min-width:260px; min-height:40px; }
+    .form input, .form textarea, .form select{
+      background:var(--panel); color:var(--text); border:1px solid rgba(255,255,255,.06);
+      border-radius:10px; padding:10px 12px; outline:none;
+    }
 
     table{ width:100%; border-collapse:collapse; }
     th, td{ padding:10px 12px; text-align:left; border-bottom:1px solid rgba(255,255,255,.08); }
@@ -39,23 +45,11 @@
 
     .footer{ position:fixed; bottom:10px; left:0; right:0; display:flex; justify-content:center; color:var(--muted); font-size:12px; }
     .footer strong{ color:var(--text); }
-
-    .slot {
-  background:var(--panel);
-  border:1px solid rgba(255,255,255,.08);
-  border-radius:10px; padding:10px 12px;
-  display:flex; align-items:center; justify-content:space-between; gap:8px;
-}
-.slot.disabled { opacity:.45; }
-.slot .meta { font-size:12px; color:var(--muted); }
-.slot .ok   { color:var(--good); font-weight:600; }
-.slot .bad  { color:var(--danger); font-weight:600; }
   </style>
 </head>
-
 <body>
   <div class="container">
-    <!-- AUTH -->
+    <!-- LOGIN -->
     <div id="authSection" class="card">
       <div class="section-title">Log in or Sign up</div>
       <form id="authForm">
@@ -66,7 +60,7 @@
     </div>
 
     <!-- MAIN APP -->
-    <div id="mainApp">
+    <div id="mainApp" style="display:none;">
       <div class="controls">
         <button id="logoutBtn" class="btn ghost">Log out</button>
       </div>
@@ -74,7 +68,7 @@
       <div class="grid">
         <div class="card">
           <div class="section-title">Flip Clock</div>
-          <div id="clockDisplay" class="clock"></div>
+          <div id="clockDisplay" class="clock">--:--:--</div>
         </div>
 
         <div class="card">
@@ -83,51 +77,25 @@
             <input type="text" id="activity" placeholder="What are you doing?" required />
             <select id="category">
               <option value="">No tag</option>
-              <option>Study</option>
-              <option>Work</option>
-              <option>Gym</option>
-              <option>Deep Work</option>
-              <option>Content</option>
-              <option>Admin</option>
+              <option>Study</option><option>Work</option><option>Gym</option>
+              <option>Deep Work</option><option>Content</option><option>Admin</option>
             </select>
             <textarea id="notes" placeholder="Notes (optional)"></textarea>
             <button id="clockInBtn" class="btn success" type="button">Clock In</button>
-            <button id="clockOutBtn" class="btn warn" type="button">Clock Out</button>
+            <button id="clockOutBtn" class="btn warn" type="button" disabled>Clock Out</button>
           </form>
         </div>
       </div>
 
       <div class="card" style="width:100%; max-width:1100px;">
         <div class="section-title">Entries</div>
-        <table id="entriesTable">
-          <thead>
-            <tr>
-              <th>Date</th><th>Start</th><th>End</th><th>Activity</th><th>Tag</th><th>Notes</th>
-            </tr>
-          </thead>
+        <table>
+          <thead><tr><th>Date</th><th>Start</th><th>End</th><th>Activity</th><th>Tag</th><th>Notes</th></tr></thead>
           <tbody id="entriesBody"></tbody>
         </table>
       </div>
     </div>
-<div class="card" id="socialTracker">
-  <div class="section-title">Social Media Tracker (30-min Check-ins)</div>
 
-  <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin-bottom:8px;">
-    <button id="smStartBtn" class="btn success" type="button">Start Social Session</button>
-    <button id="smStopBtn"  class="btn warn"    type="button" disabled>Stop Session</button>
-    <button id="smProdBtn"  class="btn ghost"   type="button" disabled title="Mark last session as productive">Mark Productive</button>
-    <button id="smUnprodBtn"class="btn ghost"   type="button" disabled title="Mark last session as unproductive">Mark Unproductive</button>
-    <span id="smStatus" style="color:var(--muted)">No active session.</span>
-  </div>
-
-  <div style="margin:6px 0 10px;">
-    <strong>Today’s 30-min slots</strong> (tick ✅ if you stayed off social):
-  </div>
-
-  <div id="slotsGrid" style="display:grid; grid-template-columns:repeat(auto-fill,minmax(160px,1fr)); gap:8px;"></div>
-
-  <div class="date-line" id="smSummary">—</div>
-</div>
     <div class="footer">Made for <strong>Meri</strong></div>
   </div>
 
@@ -138,101 +106,89 @@
     const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVxcXVuY2xmeHptZm9zand6d2tpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjE5NDg1MDQsImV4cCI6MjA3NzUyNDUwNH0.1N5pYTxFf6PjCMgQ0nUICsc9jLL58LuDZgX_s8yLe_w";
     const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-    function updateClockButtons(isRunning) {
-      document.getElementById("clockInBtn").disabled = isRunning;
-      document.getElementById("clockOutBtn").disabled = !isRunning;
+    function fmtDate(t){return new Date(t).toLocaleDateString();}
+    function fmtTime(t){return new Date(t).toLocaleTimeString();}
+    function escapeHtml(s=""){return s.replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
+
+    function updateClockButtons(running){
+      document.getElementById("clockInBtn").disabled = running;
+      document.getElementById("clockOutBtn").disabled = !running;
     }
 
-    async function getCurrentUser() {
-      const { data: { user } } = await supabase.auth.getUser();
+    async function getCurrentUser(){
+      const { data:{ user } } = await supabase.auth.getUser();
       return user;
     }
 
-    async function handleAuth(event) {
-      event.preventDefault();
-      const email = document.getElementById("authEmail").value;
-      const password = document.getElementById("authPassword").value;
-      let { error } = await supabase.auth.signInWithPassword({ email, password });
-      if (error) {
-        const { error: signUpError } = await supabase.auth.signUp({ email, password });
-        if (signUpError) return alert("Auth error: " + signUpError.message);
-        alert("Signup successful! Check your email.");
-      } else {
-        alert("Login successful!");
-      }
+    async function setupAfterLogin(){
+      const user = await getCurrentUser();
+      if(!user) return;
+      document.getElementById("authSection").style.display = "none";
+      document.getElementById("mainApp").style.display = "block";
+      loadEntriesFromDB(user.id);
+    }
+
+    async function handleAuth(e){
+      e.preventDefault();
+      const email=document.getElementById("authEmail").value;
+      const password=document.getElementById("authPassword").value;
+      let {error}=await supabase.auth.signInWithPassword({email,password});
+      if(error){
+        const {error:signUpError}=await supabase.auth.signUp({email,password});
+        if(signUpError) return alert(signUpError.message);
+        alert("Signup successful!");
+      } else alert("Login successful!");
       setupAfterLogin();
     }
 
-    async function handleLogout() {
-      await supabase.auth.signOut();
-      window.location.reload();
+    async function handleLogout(){await supabase.auth.signOut(); window.location.reload();}
+
+    async function clockIn(){
+      const user=await getCurrentUser(); if(!user) return alert("Please log in first.");
+      const activity=document.getElementById("activity").value.trim();
+      const tag=document.getElementById("category").value;
+      const notes=document.getElementById("notes").value.trim();
+      const {error}=await supabase.from("logs").insert([{user_id:user.id,activity,tag,notes,start_time:new Date().toISOString()}]);
+      if(error) return alert(error.message);
+      updateClockButtons(true); loadEntriesFromDB(user.id);
     }
 
-    async function clockIn() {
-      const user = await getCurrentUser();
-      if (!user) return alert("Please log in first.");
-      const activity = document.getElementById("activity").value.trim();
-      const tag = document.getElementById("category").value;
-      const notes = document.getElementById("notes").value.trim();
-      const start_time = new Date().toISOString();
-      const { error } = await supabase.from("logs").insert([{ user_id: user.id, activity, tag, notes, start_time }]);
-      if (error) return alert("❌ " + error.message);
-      alert("✅ Clocked in!");
-      updateClockButtons(true);
-      loadEntriesFromDB(user.id);
+    async function clockOut(){
+      const user=await getCurrentUser(); if(!user) return alert("Please log in first.");
+      const activity=document.getElementById("activity").value.trim();
+      const {error}=await supabase.from("logs").update({end_time:new Date().toISOString()})
+        .eq("user_id",user.id).eq("activity",activity).is("end_time",null);
+      if(error) return alert(error.message);
+      updateClockButtons(false); loadEntriesFromDB(user.id);
     }
 
-    async function clockOut() {
-      const user = await getCurrentUser();
-      if (!user) return alert("Please log in first.");
-      const activity = document.getElementById("activity").value.trim();
-      const { error } = await supabase
-        .from("logs")
-        .update({ end_time: new Date().toISOString() })
-        .eq("user_id", user.id)
-        .eq("activity", activity)
-        .is("end_time", null);
-      if (error) return alert("❌ " + error.message);
-      alert("⏰ Clocked out!");
-      updateClockButtons(false);
-      loadEntriesFromDB(user.id);
-    }
-
-    async function loadEntriesFromDB(userId) {
-      const { data, error } = await supabase
-        .from("logs")
-        .select("*")
-        .eq("user_id", userId)
-        .order("start_time", { ascending: false });
-      if (error) return console.error(error);
-      const tbody = document.getElementById("entriesBody");
-      tbody.innerHTML = "";
-      data.forEach(r => {
-        const tr = document.createElement("tr");
-        tr.innerHTML = `
-          <td>${fmtDate(r.start_time)}</td>
-          <td>${fmtTime(r.start_time)}</td>
-          <td>${r.end_time ? fmtTime(r.end_time) : "—"}</td>
-          <td>${escapeHtml(r.activity)}</td>
-          <td>${escapeHtml(r.tag)}</td>
-          <td>${escapeHtml(r.notes)}</td>`;
+    async function loadEntriesFromDB(userId){
+      const {data,error}=await supabase.from("logs").select("*").eq("user_id",userId).order("start_time",{ascending:false});
+      if(error) return console.error(error);
+      const tbody=document.getElementById("entriesBody"); tbody.innerHTML="";
+      data.forEach(r=>{
+        const tr=document.createElement("tr");
+        tr.innerHTML=`<td>${fmtDate(r.start_time)}</td><td>${fmtTime(r.start_time)}</td>
+                      <td>${r.end_time?fmtTime(r.end_time):"—"}</td>
+                      <td>${escapeHtml(r.activity)}</td><td>${escapeHtml(r.tag)}</td><td>${escapeHtml(r.notes)}</td>`;
         tbody.appendChild(tr);
       });
     }
 
-    function fmtDate(d) {
-      const date = new Date(d);
-      return date.toLocaleDateString();
+    function startClock(){
+      const el=document.getElementById("clockDisplay");
+      setInterval(()=>{const d=new Date(); el.textContent=d.toLocaleTimeString();},1000);
     }
 
-    function fmtTime(t) {
-      const date = new Date(t);
-      return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" });
-    }
-
-    function escapeHtml(s = "") {
-      return s.replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
-    }
+    window.addEventListener("DOMContentLoaded",async()=>{
+      startClock();
+      document.getElementById("authForm").addEventListener("submit",handleAuth);
+      document.getElementById("logoutBtn").addEventListener("click",handleLogout);
+      document.getElementById("clockInBtn").addEventListener("click",clockIn);
+      document.getElementById("clockOutBtn").addEventListener("click",clockOut);
+      const {data:{session}}=await supabase.auth.getSession();
+      if(session?.user) setupAfterLogin();
+    });
   </script>
 </body>
 </html>
