@@ -2,240 +2,49 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial‑scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Meri — Flip Clock + Time Logger</title>
+
   <style>
-    /* (Existing CSS unchanged) */
     :root{ --bg:#0b0c10; --panel:#13161b; --card:#14161a; --text:#e8ecf1; --accent:#7aa7ff; --muted:#9aa3b2; --good:#3dcc7b; --warn:#ffc24d; --danger:#ff6b6b; --shadow:rgba(0,0,0,.4); }
-    [data-theme="light"]{ --bg:#f7f9fc; --panel:#eef2f8; --card:#ffffff; --text:#0b0c10; --accent:#245cff; --muted:#566074; --good:#1ea05e; --warn:#c08a00; --danger:#d94141; --shadow:rgba(0,0,0,.08); }
     html,body{height:100%;margin:0;background:var(--bg);color:var(--text);
-      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
     }
     .container{ min-height:100%; display:flex; flex-direction:column; gap:18px; align-items:center; padding:24px 20px 80px; }
     .grid{ width:100%; max-width:1100px; display:grid; grid-template-columns:1.1fr .9fr; gap:18px; }
     @media (max-width:940px){ .grid{ grid-template-columns:1fr; } }
 
-    /* controls */
-    .controls{ display:flex; gap:12px; flex-wrap:wrap; align‑items:center; justify‑content:center; }
+    .controls{ display:flex; gap:12px; flex-wrap:wrap; align-items:center; justify-content:center; }
     .chip, .btn{ background:var(--card); color:var(--text); border:1px solid rgba(255,255,255,.06); border-radius:10px; padding:10px 14px; box-shadow:0 8px 24px var(--shadow); cursor:pointer; user-select:none; }
     .btn.primary{ border-color: transparent; background:linear-gradient(180deg, var(--accent), #436cff); color:white; }
     .btn.success{ background:linear-gradient(180deg, var(--good), #1b8b52); color:white; border-color:transparent; }
     .btn.warn{ background:linear-gradient(180deg, var(--warn), #a37400); color:white; border-color:transparent; }
     .btn.ghost{ background:transparent; border:1px dashed rgba(255,255,255,.18); }
     .btn:disabled{ opacity:.6; cursor:not-allowed; }
-    .switch{ display:inline-flex; align-items:center; gap:8px; }
-    .switch .dot{ width:12px;height:12px;border-radius:50%; background:var(--accent); box-shadow:0 0 0 3px rgba(122,167,255,.2) inset; }
 
     .card{ background:var(--card); border:1px solid rgba(255,255,255,.06); border-radius:14px; box-shadow:0 16px 40px var(--shadow); padding:18px; }
     .section-title{ font-weight:700; letter-spacing:.04em; text-transform:uppercase; font-size:12px; color:var(--muted); margin:0 0 12px; }
     .date-line{ text-align:center; color:var(--muted); margin-top:4px; }
 
-    /* Flip clock */
     .clock{ display:flex; gap:16px; align-items:center; justify-content:center; flex-wrap:wrap; }
-    .segment{ display:flex; gap:8px; }
-    .colon{ font-weight:800; font-size:48px; opacity:.75; position:relative; top:-8px; }
-    .label{ text-align:center; font-size:12px; color:var(--muted); letter-spacing:.14em; text-transform:uppercase; margin-top:8px; }
-    .flip{ position:relative; width:92px; height:120px; perspective:1000px; }
-    @media (max-width:560px){ .flip{ width:64px; height:84px; } }
-    .card-face{ position:relative; width:100%; height:100%; border-radius:14px; background:linear-gradient(180deg, var(--card), #0f1116); border:1px solid rgba(255,255,255,.06); overflow:hidden; box-shadow:0 16px 40px var(--shadow); }
-    .half{ position:absolute; left:0; right:0; height:50%; display:flex; align-items:center; justify-content:center; font-weight:800; font-variant-numeric:tabular-nums; }
-    .top{ top:0; border-bottom:1px solid rgba(0,0,0,.35); }
-    .bottom{ bottom:0; }
-    .digit{ font-size:68px; }
-    @media (max-width:560px){ .digit{ font-size:48px; } }
-    .top‑flip, .bottom‑flip{ position:absolute; left:0; right:0; height:50%; display:flex; align‑items:center; backface‑visibility:hidden; overflow:hidden; }
-    .top‑flip{ top:0; transform‑origin:bottom; border‑bottom:1px solid rgba(0,0,0,.35); background:linear-gradient(180deg, var(--card), #0f1116); }
-    .bottom‑flip{ bottom:0; transform‑origin:top; background:linear-gradient(180deg, var(--card), #0f1116); }
+    .digit{ font-size:68px; font-weight:800; }
 
-    /* Logger form */
-    .form{ display:flex; gap:10px; flex-wrap:wrap; align‑items:center; }
-    .form input, .form textarea, .form select{ background:var(--panel); color:var(--text); border:1px solid rgba(255,255,255,.06); border‑radius:10px; padding:10px 12px; outline:none; min‑width:160px; }
-    .form textarea{ min‑width:260px; min‑height:40px; }
-    .status{ margin‑top:8px; font-size:14px; }
-    .status .pill{ display:inline-flex; align‑items:center; gap:8px; padding:8px 10px; border‑radius:999px; background:rgba(122,167,255,.12); border:1px solid rgba(122,167,255,.3); }
+    .form{ display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
+    .form input, .form textarea, .form select{ background:var(--panel); color:var(--text); border:1px solid rgba(255,255,255,.06); border-radius:10px; padding:10px 12px; outline:none; min-width:160px; }
+    .form textarea{ min-width:260px; min-height:40px; }
 
-    /* Table */
-    table{ width:100%; border‑collapse:separate; border‑spacing:0; }
-    th, td{ padding:10px 12px; text‑align:left; border‑bottom:1px solid rgba(255,255,255,.08); }
-    thead th{ font‑size:12px; letter‑spacing:.12em; text‑transform:uppercase; color:var(--muted); }
-    tbody tr:hover{ background:rgba(255,255,255,.03); }
-    .right{ text‑align:right; }
-    .actions{ display:flex; gap:8px; }
-    .tag{ font‑size:12px; padding:2px 8px; border‑radius:999px; background:rgba(122,167,255,.12); border:1px solid rgba(122,167,255,.24); }
+    table{ width:100%; border-collapse:collapse; }
+    th, td{ padding:10px 12px; text-align:left; border-bottom:1px solid rgba(255,255,255,.08); }
+    thead th{ font-size:12px; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); }
 
-    .footer{ position:fixed; bottom:10px; left:0; right:0; display:flex; justify‑content:center; color:var(--muted); font‑size:12px; }
+    .footer{ position:fixed; bottom:10px; left:0; right:0; display:flex; justify-content:center; color:var(--muted); font-size:12px; }
     .footer strong{ color:var(--text); }
   </style>
-
-  <script type="module">
-    import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-
-    const SUPABASE_URL = "https://eqqunclfxzmfosjwzwki.supabase.co";
-    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVxcXVuY2xmeHptZm9zand6d2tpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjE5NDg1MDQsImV4cCI6MjA3NzUyNDUwNH0.1N5pYTxFf6PjCMgQ0nUICsc9jLL58LuDZgX_s8yLe_w";
-    const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-    // Utility to get current user
-    async function getCurrentUser() {
-      const { data: { user } } = await supabase.auth.getUser();
-      return user;
-    }
-
-    // LOGIN / SIGNUP logic
-    async function handleAuth(event) {
-      event.preventDefault();
-      const email   = document.getElementById("authEmail").value;
-      const password= document.getElementById("authPassword").value;
-      // Try sign in first
-      let { data, error } = await supabase.auth.signInWithPassword({ email, password });
-      if (error) {
-        // If sign‑in failed, try sign up
-        const { data: signUpData, error: signUpError } = await supabase.auth.signUp({ email, password });
-        if (signUpError) {
-          alert("Auth error: " + signUpError.message);
-          return;
-        }
-        alert("Signup successful! Check your email if required.");
-      } else {
-        alert("Login successful!");
-      }
-      setupAfterLogin();
-    }
-
-    async function handleLogout() {
-      await supabase.auth.signOut();
-      window.location.reload();
-    }
-
-    // After login, show/hide UI and fetch entries
-    async function setupAfterLogin() {
-      const user = await getCurrentUser();
-      if (!user) return;
-      document.getElementById("authSection").style.display = "none";
-      document.getElementById("mainApp").style.display     = "block";
-      // load entries for this user
-      loadEntriesFromDB(user.id);
-    }
-
-    // CLOCK IN
-    async function clockIn() {
-      const user = await getCurrentUser();
-      if (!user) { alert("Please log in first"); return; }
-      const activity = document.getElementById("activity").value.trim();
-      const tag      = document.getElementById("category").value;
-      const notes    = document.getElementById("notes").value.trim();
-      const startTime= new Date().toISOString();
-      const { data, error } = await supabase
-        .from("logs")
-        .insert([{ user_id: user.id, activity, tag, notes, start_time: startTime }]);
-      if (error) { alert("❌ Error: " + error.message); }
-      else     { alert("✅ Clocked in successfully!"); loadEntriesFromDB(user.id); }
-    }
-
-    // CLOCK OUT
-    async function clockOut() {
-      const user = await getCurrentUser();
-      if (!user) { alert("Please log in first"); return; }
-      const activity = document.getElementById("activity").value.trim();
-      const { data, error } = await supabase
-        .from("logs")
-        .update({ end_time: new Date().toISOString() })
-        .eq("user_id", user.id)
-        .eq("activity", activity)
-        .is("end_time", null);
-      if (error) { alert("❌ Error: " + error.message); }
-      else     { alert("⏰ Clocked out!"); loadEntriesFromDB(user.id); }
-    }
-
-
-    // Fetch and display saved entries
-async function loadEntries() {
-  const { data, error } = await supabase
-    .from("entries")
-    .select("*")
-    .order("start_time", { ascending: false });
-
-  if (error) {
-    console.error("Error loading entries:", error);
-    return;
-  }
-
-  const logList = document.getElementById("logList");
-  logList.innerHTML = ""; // clear the list
-
-  data.forEach((entry) => {
-    const div = document.createElement("div");
-    div.innerHTML = `
-      <p><strong>${entry.activity}</strong> — ${entry.tag || ""}<br>
-      ⏰ Start: ${new Date(entry.start_time).toLocaleString()}<br>
-      🕓 End: ${entry.end_time ? new Date(entry.end_time).toLocaleString() : "— still active —"}</p>
-      <hr>`;
-    logList.appendChild(div);
-  });
-}
-    
-    // LOAD user’s logs
-    async function loadEntriesFromDB(userId) {
-      const { data, error } = await supabase
-        .from("logs")
-        .select("*")
-        .eq("user_id", userId)
-        .order("start_time", { ascending:false });
-      if (error) { console.error("Load error:", error); return; }
-      const tbody = document.getElementById("entriesBody");
-      tbody.innerHTML = "";
-      const is24  = document.getElementById("formatToggle").checked;
-      data.forEach(r => {
-        const start = new Date(r.start_time);
-        const end   = r.end_time ? new Date(r.end_time) : null;
-        const durationMs = r.duration_ms || (end ? (end - start) : 0);
-        const row = document.createElement("tr");
-        row.innerHTML = `
-          <td>${fmtDate(start)}</td>
-          <td>${fmtTime(start, is24)}</td>
-          <td>${end ? fmtTime(end, is24) : '-'}</td>
-          <td class="right">${durationMs ? msToHMS(durationMs) : '-'}</td>
-          <td>${escapeHtml(r.activity || '')}</td>
-          <td>${r.tag ? `<span class="tag">${escapeHtml(r.tag)}</span>` : ''}</td>
-          <td>${escapeHtml(r.notes || '')}</td>
-          <td class="actions">
-            <button class="btn ghost" data-id="${r.id}">Delete</button>
-          </td>`;
-        tbody.appendChild(row);
-      });
-      tbody.querySelectorAll('[data-id]').forEach(btn => {
-        btn.addEventListener('click', async e => {
-          const id = e.currentTarget.dataset.id;
-          await supabase.from("logs").delete().eq("id", id).eq("user_id", userId);
-          loadEntriesFromDB(userId);
-        });
-      });
-    }
-
-    // On page load: check session
-    window.addEventListener('DOMContentLoaded', async () => {
-      // Setup UI parts
-      document.getElementById("mainApp").style.display     = "none";
-      document.getElementById("authSection").style.display = "block";
-
-      const { data: { session }, error } = await supabase.auth.getSession();
-      if (session?.user) {
-        setupAfterLogin();
-      }
-
-      // Setup event listeners
-      document.getElementById("authForm").addEventListener("submit", handleAuth);
-      document.getElementById("logoutBtn").addEventListener("click", handleLogout);
-      document.getElementById("clockInBtn").addEventListener("click", clockIn);
-      document.getElementById("clockOutBtn").addEventListener("click", clockOut);
-    });
-
-    // (Other utilities: pad, fmtDate, fmtTime, msToHMS, escapeHtml, flip clock logic) remain unchanged
-    // Copy your original functions from your previous script for clock and UI
-  </script>
 </head>
+
 <body>
   <div class="container">
-    <!-- AUTH SECTION -->
+    <!-- AUTH -->
     <div id="authSection" class="card">
       <div class="section-title">Log in or Sign up</div>
       <form id="authForm">
@@ -245,35 +54,16 @@ async function loadEntries() {
       </form>
     </div>
 
-    <!-- MAIN APP SECTION -->
+    <!-- MAIN APP -->
     <div id="mainApp">
       <div class="controls">
-        <label class="chip switch" title="Toggle light/dark">
-          <input id="themeToggle" type="checkbox" />
-          <span class="dot"></span><span>Light</span>
-        </label>
-        <label class="chip switch" title="Toggle 24h/12h">
-          <input id="formatToggle" type="checkbox" checked />
-          <span class="dot"></span><span>24‑hour</span>
-        </label>
-        <button id="fullscreenBtn" class="btn">Full screen</button>
         <button id="logoutBtn" class="btn ghost">Log out</button>
-        <button id="exportBtn" class="btn primary" title="Export entries to CSV">Export CSV</button>
-        <button id="clearBtn" class="btn ghost" title="Clear all entries">Clear All</button>
       </div>
 
       <div class="grid">
         <div class="card">
           <div class="section-title">Flip Clock</div>
-          <div class="date-line" id="dateLine">—</div>
-          <div class="clock" aria-live="polite" style="margin-top:10px;">
-            <div class="segment" id="hoursSeg" aria-label="Hours"></div>
-            <div class="colon">:</div>
-            <div class="segment" id="minsSeg" aria-label="Minutes"></div>
-            <div class="colon">:</div>
-            <div class="segment" id="secsSeg" aria-label="Seconds"></div>
-          </div>
-          <div class="label" id="tzLabel">—</div>
+          <div id="clockDisplay" class="clock"></div>
         </div>
 
         <div class="card">
@@ -291,38 +81,163 @@ async function loadEntries() {
             </select>
             <textarea id="notes" placeholder="Notes (optional)"></textarea>
             <button id="clockInBtn" class="btn success" type="button">Clock In</button>
-            <button id="clockOutBtn" class="btn warn" type="button" disabled>Clock Out</button>
+            <button id="clockOutBtn" class="btn warn" type="button">Clock Out</button>
           </form>
-          <div class="status" id="statusLine">Not tracking.</div>
         </div>
       </div>
 
       <div class="card" style="width:100%; max-width:1100px;">
         <div class="section-title">Entries</div>
-        <div style="overflow:auto;">
-          <table id="entriesTable" aria-label="Time entries">
-            <thead>
-              <tr>
-                <th>Date</th>
-                <th>Start</th>
-                <th>End</th>
-                <th class="right">Duration</th>
-                <th>Activity</th>
-                <th>Tag</th>
-                <th>Notes</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody id="entriesBody"></tbody>
-          </table>
-        </div>
+        <table id="entriesTable">
+          <thead>
+            <tr>
+              <th>Date</th><th>Start</th><th>End</th><th>Activity</th><th>Tag</th><th>Notes</th>
+            </tr>
+          </thead>
+          <tbody id="entriesBody"></tbody>
+        </table>
       </div>
     </div>
 
-    <div class="footer">Made for <strong>Meri</strong> — Press <strong>F</strong> to toggle full screen • Press <strong>S</strong> to start/stop</div>
+    <div class="footer">Made for <strong>Meri</strong></div>
   </div>
 
-  <!-- (Optional leftover trackers or other elements from original — you may remove duplicates) -->
+  <script type="module">
+    import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
+    const SUPABASE_URL = "https://eqqunclfxzmfosjwzwki.supabase.co";
+    const SUPABASE_ANON_KEY = "YOUR_ANON_PUBLIC_KEY_HERE";
+    const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    function updateClockButtons(isRunning) {
+      document.getElementById("clockInBtn").disabled = isRunning;
+      document.getElementById("clockOutBtn").disabled = !isRunning;
+    }
+
+    async function getCurrentUser() {
+      const { data: { user } } = await supabase.auth.getUser();
+      return user;
+    }
+
+    async function handleAuth(event) {
+      event.preventDefault();
+      const email = document.getElementById("authEmail").value;
+      const password = document.getElementById("authPassword").value;
+      let { error } = await supabase.auth.signInWithPassword({ email, password });
+      if (error) {
+        const { error: signUpError } = await supabase.auth.signUp({ email, password });
+        if (signUpError) return alert("Auth error: " + signUpError.message);
+        alert("Signup successful! Check your email.");
+      } else {
+        alert("Login successful!");
+      }
+      setupAfterLogin();
+    }
+
+    async function handleLogout() {
+      await supabase.auth.signOut();
+      window.location.reload();
+    }
+
+    async function clockIn() {
+      const user = await getCurrentUser();
+      if (!user) return alert("Please log in first.");
+      const activity = document.getElementById("activity").value.trim();
+      const tag = document.getElementById("category").value;
+      const notes = document.getElementById("notes").value.trim();
+      const start_time = new Date().toISOString();
+      const { error } = await supabase.from("logs").insert([{ user_id: user.id, activity, tag, notes, start_time }]);
+      if (error) return alert("❌ " + error.message);
+      alert("✅ Clocked in!");
+      updateClockButtons(true);
+      loadEntriesFromDB(user.id);
+    }
+
+    async function clockOut() {
+      const user = await getCurrentUser();
+      if (!user) return alert("Please log in first.");
+      const activity = document.getElementById("activity").value.trim();
+      const { error } = await supabase
+        .from("logs")
+        .update({ end_time: new Date().toISOString() })
+        .eq("user_id", user.id)
+        .eq("activity", activity)
+        .is("end_time", null);
+      if (error) return alert("❌ " + error.message);
+      alert("⏰ Clocked out!");
+      updateClockButtons(false);
+      loadEntriesFromDB(user.id);
+    }
+
+    async function loadEntriesFromDB(userId) {
+      const { data, error } = await supabase
+        .from("logs")
+        .select("*")
+        .eq("user_id", userId)
+        .order("start_time", { ascending: false });
+      if (error) return console.error(error);
+      const tbody = document.getElementById("entriesBody");
+      tbody.innerHTML = "";
+      data.forEach(r => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${fmtDate(r.start_time)}</td>
+          <td>${fmtTime(r.start_time)}</td>
+          <td>${r.end_time ? fmtTime(r.end_time) : "—"}</td>
+          <td>${escapeHtml(r.activity)}</td>
+          <td>${escapeHtml(r.tag)}</td>
+          <td>${escapeHtml(r.notes)}</td>`;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function fmtDate(d) {
+      const date = new Date(d);
+      return date.toLocaleDateString();
+    }
+
+    function fmtTime(t) {
+      const date = new Date(t);
+      return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+    }
+
+    function escapeHtml(s = "") {
+      return s.replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+    }
+
+    // Flip Clock logic
+    function updateClock() {
+      const now = new Date();
+      const h = String(now.getHours()).padStart(2, "0");
+      const m = String(now.getMinutes()).padStart(2, "0");
+      const s = String(now.getSeconds()).padStart(2, "0");
+      document.getElementById("clockDisplay").innerHTML = `
+        <span class="digit">${h}</span> : 
+        <span class="digit">${m}</span> : 
+        <span class="digit">${s}</span>`;
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
+
+    async function setupAfterLogin() {
+      const user = await getCurrentUser();
+      if (!user) return;
+      document.getElementById("authSection").style.display = "none";
+      document.getElementById("mainApp").style.display = "block";
+      loadEntriesFromDB(user.id);
+      updateClockButtons(false);
+    }
+
+    window.addEventListener("DOMContentLoaded", async () => {
+      document.getElementById("mainApp").style.display = "none";
+      document.getElementById("authForm").addEventListener("submit", handleAuth);
+      document.getElementById("logoutBtn").addEventListener("click", handleLogout);
+      document.getElementById("clockInBtn").addEventListener("click", clockIn);
+      document.getElementById("clockOutBtn").addEventListener("click", clockOut);
+
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.user) setupAfterLogin();
+    });
+  </script>
 </body>
 </html>
