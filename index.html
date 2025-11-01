@@ -545,7 +545,7 @@ async function loadClockEntries(uid){
   });
 }
 
-/* ================= Creator Sessions (creator_sessions) ================= */
+/* ================= Creator Sessions (social_sessions) ================= */
 let creatorTimer = null;
 let creatorStartTime = null;
 
@@ -587,7 +587,7 @@ async function stopCreator(){
   const noteDur = formatDuration(new Date(endIso) - new Date(startIso));
 
   const { error } = await supabase
-    .from("creator_sessions")
+    .from("social_sessions")
     .insert({
       user_id: user.id,
       start_time: startIso,
@@ -618,7 +618,7 @@ async function loadCreatorEntries(uid){
   const from = startOfDayUtc(d).toISOString();
   const to = nextDayUtc(d).toISOString();
   const { data, error } = await supabase
-    .from("creator_sessions")
+    .from("social_sessions")
     .select("*")
     .eq("user_id", uid)
     .gte("start_time", from).lt("start_time", to)
