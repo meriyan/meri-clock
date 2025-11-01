@@ -3,391 +3,203 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Meri — Flip Clock + Time Logger</title>
+  <title>Meri — Daily Tracker</title>
   <style>
-    /* (Existing CSS unchanged) */
     :root{ --bg:#0b0c10; --panel:#13161b; --card:#14161a; --text:#e8ecf1; --accent:#7aa7ff; --muted:#9aa3b2; --good:#3dcc7b; --warn:#ffc24d; --danger:#ff6b6b; --shadow:rgba(0,0,0,.4); }
-    [data-theme="light"]{ --bg:#f7f9fc; --panel:#eef2f8; --card:#ffffff; --text:#0b0c10; --accent:#245cff; --muted:#566074; --good:#1ea05e; --warn:#c08a00; --danger:#d94141; --shadow:rgba(0,0,0,.08); }
-    html,body{height:100%;margin:0;background:var(--bg);color:var(--text);
-      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
-    }
-    .container{ min-height:100%; display:flex; flex-direction:column; gap:18px; align-items:center; padding:24px 20px 80px; }
-    .grid{ width:100%; max-width:1100px; display:grid; grid-template-columns:1.1fr .9fr; gap:18px; }
-    @media (max-width:940px){ .grid{ grid-template-columns:1fr; } }
+    html,body{height:100%;margin:0;background:var(--bg);color:var(--text);font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;}
+    .container{ min-height:100%; display:flex; flex-direction:column; align-items:center; padding:24px 20px 80px; }
 
-    /* controls */
+    .card{ background:var(--card); border:1px solid rgba(255,255,255,.06); border-radius:14px; box-shadow:0 16px 40px var(--shadow); padding:18px; max-width:1100px; width:100%; }
+
+    .section-title{ font-weight:700; letter-spacing:.04em; text-transform:uppercase; font-size:12px; color:var(--muted); margin:0 0 12px; }
     .controls{ display:flex; gap:12px; flex-wrap:wrap; align-items:center; justify-content:center; }
-    .chip, .btn{ background:var(--card); color:var(--text); border:1px solid rgba(255,255,255,.06); border-radius:10px; padding:10px 14px; box-shadow:0 8px 24px var(--shadow); cursor:pointer; user-select:none; }
-    .btn.primary{ border-color: transparent; background:linear-gradient(180deg, var(--accent), #436cff); color:white; }
+    .btn{ background:var(--card); color:var(--text); border:1px solid rgba(255,255,255,.06); border-radius:10px; padding:10px 14px; box-shadow:0 8px 24px var(--shadow); cursor:pointer; user-select:none; }
+    .btn.primary{ background:linear-gradient(180deg, var(--accent), #436cff); color:white; border-color:transparent; }
     .btn.success{ background:linear-gradient(180deg, var(--good), #1b8b52); color:white; border-color:transparent; }
     .btn.warn{ background:linear-gradient(180deg, var(--warn), #a37400); color:white; border-color:transparent; }
     .btn.ghost{ background:transparent; border:1px dashed rgba(255,255,255,.18); }
-    .btn:disabled{ opacity:.6; cursor:not-allowed; }
-    .switch{ display:inline-flex; align-items:center; gap:8px; }
-    .switch .dot{ width:12px;height:12px;border-radius:50%; background:var(--accent); box-shadow:0 0 0 3px rgba(122,167,255,.2) inset; }
 
-    .card{ background:var(--card); border:1px solid rgba(255,255,255,.06); border-radius:14px; box-shadow:0 16px 40px var(--shadow); padding:18px; }
-    .section-title{ font-weight:700; letter-spacing:.04em; text-transform:uppercase; font-size:12px; color:var(--muted); margin:0 0 12px; }
-    .date-line{ text-align:center; color:var(--muted); margin-top:4px; }
+    .date-selector{ display:flex; flex-direction:column; gap:12px; align-items:center; }
+    .year-box, .month-box{ background:var(--panel); border-radius:10px; padding:10px 16px; width:100%; max-width:400px; cursor:pointer; }
+    .days-grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(80px,1fr)); gap:8px; width:100%; max-width:400px; margin-top:6px; }
+    .day-btn{ background:var(--card); border:1px solid rgba(255,255,255,.08); border-radius:8px; padding:8px; text-align:center; cursor:pointer; transition:.2s; }
+    .day-btn:hover{ background:var(--accent); color:white; }
 
-    /* Flip clock */
     .clock{ display:flex; gap:16px; align-items:center; justify-content:center; flex-wrap:wrap; }
     .segment{ display:flex; gap:8px; }
     .colon{ font-weight:800; font-size:48px; opacity:.75; position:relative; top:-8px; }
-    .label{ text-align:center; font-size:12px; color:var(--muted); letter-spacing:.14em; text-transform:uppercase; margin-top:8px; }
     .flip{ position:relative; width:92px; height:120px; perspective:1000px; }
-    @media (max-width:560px){ .flip{ width:64px; height:84px; } }
-    .card-face{ position:relative; width:100%; height:100%; border-radius:14px; background:linear-gradient(180deg, var(--card), #0f1116); border:1px solid rgba(255,255,255,.06); overflow:hidden; box-shadow:0 16px 40px var(--shadow); }
+    .card-face{ position:relative; width:100%; height:100%; border-radius:14px; background:linear-gradient(180deg, var(--card), #0f1116); border:1px solid rgba(255,255,255,.06); overflow:hidden; }
     .half{ position:absolute; left:0; right:0; height:50%; display:flex; align-items:center; justify-content:center; font-weight:800; font-variant-numeric:tabular-nums; }
     .top{ top:0; border-bottom:1px solid rgba(0,0,0,.35); }
     .bottom{ bottom:0; }
     .digit{ font-size:68px; }
-    @media (max-width:560px){ .digit{ font-size:48px; } }
-    .top-flip, .bottom-flip{ position:absolute; left:0; right:0; height:50%; display:flex; align-items:center; backface-visibility:hidden; overflow:hidden; }
-    .top-flip{ top:0; transform-origin:bottom; border-bottom:1px solid rgba(0,0,0,.35); background:linear-gradient(180deg, var(--card), #0f1116); }
-    .bottom-flip{ bottom:0; transform-origin:top; background:linear-gradient(180deg, var(--card), #0f1116); }
 
-    /* Logger form */
-    .form{ display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
-    .form input, .form textarea, .form select{ background:var(--panel); color:var(--text); border:1px solid rgba(255,255,255,.06); border-radius:10px; padding:10px 12px; outline:none; min-width:160px; }
-    .form textarea{ min-width:260px; min-height:40px; }
-    .status{ margin-top:8px; font-size:14px; }
-    .status .pill{ display:inline-flex; align-items:center; gap:8px; padding:8px 10px; border-radius:999px; background:rgba(122,167,255,.12); border:1px solid rgba(122,167,255,.3); }
-
-    /* Table */
     table{ width:100%; border-collapse:separate; border-spacing:0; }
     th, td{ padding:10px 12px; text-align:left; border-bottom:1px solid rgba(255,255,255,.08); }
     thead th{ font-size:12px; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); }
-    tbody tr:hover{ background:rgba(255,255,255,.03); }
     .right{ text-align:right; }
-    .actions{ display:flex; gap:8px; }
-    .tag{ font-size:12px; padding:2px 8px; border-radius:999px; background:rgba(122,167,255,.12); border:1px solid rgba(122,167,255,.24); }
 
-    .footer{ position:fixed; bottom:10px; left:0; right:0; display:flex; justify-content:center; color:var(--muted); font-size:12px; }
-    .footer strong{ color:var(--text); }
-
-    /* Focus Zone mini timer + checkbox chip style */
-    .mini-timer{ font-weight:800; font-variant-numeric:tabular-nums; }
-    .slot{ background:var(--panel); border:1px solid rgba(255,255,255,.08);
-      border-radius:10px; padding:10px 12px; display:flex; align-items:center; justify-content:space-between; gap:8px; }
+    .slot{ background:var(--panel); border:1px solid rgba(255,255,255,.08); border-radius:10px; padding:10px 12px; display:flex; align-items:center; justify-content:space-between; gap:8px; }
   </style>
 
   <script type="module">
     import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-
-    /* === Supabase (kept from your working version) === */
     const SUPABASE_URL = "https://eqqunclfxzmfosjwzwki.supabase.co";
     const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVxcXVuY2xmeHptZm9zand6d2tpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjE5NDg1MDQsImV4cCI6MjA3NzUyNDUwNH0.1N5pYTxFf6PjCMgQ0nUICsc9jLL58LuDZgX_s8yLe_w";
     const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-    /* === Helpers === */
-    const pad = n => n.toString().padStart(2,'0');
-    const escapeHtml = (s='') => s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-    const fmtDate = d => `${pad(d.getDate())}.${pad(d.getMonth()+1)}.${d.getFullYear()}`;
-    const fmtTime = (d,is24=true) => d.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit', second:'2-digit', hour12:!is24});
-    const msToHMS = ms => {
-      const s = Math.floor(ms/1000);
-      const h = Math.floor(s/3600), m = Math.floor((s%3600)/60), ss = s%60;
-      return `${pad(h)}:${pad(m)}:${pad(ss)}`;
-    };
-    function startOfDayUtc(d){
-      const x = new Date(d.getFullYear(), d.getMonth(), d.getDate(), 0,0,0);
-      return new Date(x.getTime() - x.getTimezoneOffset()*60000); // to UTC iso boundary
-    }
-    function nextDayUtc(d){
-      const x = new Date(d.getFullYear(), d.getMonth(), d.getDate()+1, 0,0,0);
-      return new Date(x.getTime() - x.getTimezoneOffset()*60000);
-    }
+    const pad=n=>n.toString().padStart(2,"0");
+    const fmtDate=d=>`${pad(d.getDate())}.${pad(d.getMonth()+1)}.${d.getFullYear()}`;
+    function startOfDayUtc(d){ const x=new Date(d.getFullYear(),d.getMonth(),d.getDate(),0,0,0); return new Date(x.getTime()-x.getTimezoneOffset()*60000);}
+    function nextDayUtc(d){ const x=new Date(d.getFullYear(),d.getMonth(),d.getDate()+1,0,0,0); return new Date(x.getTime()-x.getTimezoneOffset()*60000);}
+    async function getCurrentUser(){const {data:{user}}=await supabase.auth.getUser();return user;}
 
-    /* === Auth === */
-    async function getCurrentUser() {
-      const { data:{ user } } = await supabase.auth.getUser();
-      return user;
-    }
-    async function handleAuth(event) {
-      event.preventDefault();
-      const email   = document.getElementById("authEmail").value;
-      const password= document.getElementById("authPassword").value;
-      let { error } = await supabase.auth.signInWithPassword({ email, password });
-      if (error) {
-        const { error: signUpError } = await supabase.auth.signUp({ email, password });
-        if (signUpError) return alert("Auth error: " + signUpError.message);
-        alert("Signup successful! Check your email if required.");
-      } else {
-        alert("Login successful!");
-      }
+    async function handleAuth(e){
+      e.preventDefault();
+      const email=document.getElementById("authEmail").value;
+      const password=document.getElementById("authPassword").value;
+      let {error}=await supabase.auth.signInWithPassword({email,password});
+      if(error){const {error:e2}=await supabase.auth.signUp({email,password});
+      if(e2)return alert("Auth error: "+e2.message);alert("Signup successful!");}
+      else alert("Login successful!");
       setupAfterLogin();
     }
-    async function handleLogout() { await supabase.auth.signOut(); location.reload(); }
 
-    /* === Logs (clock in/out) === */
-    async function clockIn() {
-      const user = await getCurrentUser();
-      if (!user) return alert("Please log in first");
-      const activity = document.getElementById("activity").value.trim();
-      const tag      = document.getElementById("category").value;
-      const notes    = document.getElementById("notes").value.trim();
-      const startTime= new Date().toISOString();
-      const { error } = await supabase.from("logs").insert([{ user_id:user.id, activity, tag, notes, start_time:startTime }]);
-      if (error) alert("❌ " + error.message);
-      else { alert("✅ Clocked in!"); loadEntriesFromDB(user.id); document.getElementById("clockOutBtn").disabled=false; }
-    }
-    async function clockOut() {
-      const user = await getCurrentUser();
-      if (!user) return alert("Please log in first");
-      const activity = document.getElementById("activity").value.trim();
-      const { error } = await supabase
-        .from("logs")
-        .update({ end_time: new Date().toISOString() })
-        .eq("user_id", user.id)
-        .eq("activity", activity)
-        .is("end_time", null);
-      if (error) alert("❌ " + error.message);
-      else { alert("⏰ Clocked out!"); loadEntriesFromDB(user.id); document.getElementById("clockOutBtn").disabled=true; }
-    }
-    async function loadEntriesFromDB(userId) {
-      const { data, error } = await supabase
-        .from("logs")
-        .select("*")
-        .eq("user_id", userId)
-        .order("start_time", { ascending:false });
-      if (error) { console.error("Load error:", error); return; }
-      const tbody = document.getElementById("entriesBody");
-      const is24  = document.getElementById("formatToggle").checked;
-      tbody.innerHTML = "";
-      data.forEach(r => {
-        const start = new Date(r.start_time);
-        const end   = r.end_time ? new Date(r.end_time) : null;
-        const durationMs = r.duration_ms || (end ? (end - start) : 0);
-        const row = document.createElement("tr");
-        row.innerHTML = `
-          <td>${fmtDate(start)}</td>
-          <td>${fmtTime(start, is24)}</td>
-          <td>${end ? fmtTime(end, is24) : '-'}</td>
-          <td class="right">${durationMs ? msToHMS(durationMs) : '-'}</td>
-          <td>${escapeHtml(r.activity || '')}</td>
-          <td>${r.tag ? `<span class="tag">${escapeHtml(r.tag)}</span>` : ''}</td>
-          <td>${escapeHtml(r.notes || '')}</td>
-          <td class="actions">
-            <button class="btn ghost" data-id="${r.id}">Delete</button>
-          </td>`;
-        tbody.appendChild(row);
-      });
-      tbody.querySelectorAll('[data-id]').forEach(btn => {
-        btn.addEventListener('click', async e => {
-          const id = e.currentTarget.dataset.id;
-          await supabase.from("logs").delete().eq("id", id).eq("user_id", userId);
-          loadEntriesFromDB(userId);
-        });
-      });
-    }
+    async function handleLogout(){await supabase.auth.signOut();location.reload();}
 
-    /* === Flip clock rendering (simple numeric update into segments) === */
-    function renderDigits(segId, str){
-      const seg = document.getElementById(segId);
-      seg.innerHTML = '';
-      for(const ch of str){
-        const el = document.createElement('div');
-        el.className = 'flip';
-        el.innerHTML = `
-          <div class="card-face">
-            <div class="half top"><div class="digit">${ch}</div></div>
-            <div class="half bottom"><div class="digit">${ch}</div></div>
-          </div>`;
-        seg.appendChild(el);
+    // Date selector build
+    const months=["January","February","March","April","May","June","July","August","September","October","November","December"];
+    function buildDateSelector(){
+      const container=document.getElementById("dateSelector");
+      container.innerHTML="";
+      for(let y=2025;y<=2030;y++){
+        const yDiv=document.createElement("div");
+        yDiv.className="year-box";
+        yDiv.textContent=y;
+        yDiv.addEventListener("click",()=>toggleMonths(yDiv,y));
+        container.appendChild(yDiv);
       }
     }
-    function tickClock(){
-      const now = new Date();
-      const h = pad(now.getHours()), m = pad(now.getMinutes()), s = pad(now.getSeconds());
-      renderDigits('hoursSeg', h);
-      renderDigits('minsSeg',  m);
-      renderDigits('secsSeg',  s);
-      document.getElementById('dateLine').textContent = now.toLocaleDateString();
-      document.getElementById('tzLabel').textContent  = Intl.DateTimeFormat().resolvedOptions().timeZone;
+
+    function toggleMonths(yDiv,year){
+      let existing=yDiv.nextElementSibling;
+      if(existing&&existing.classList.contains("month-container")){existing.remove();return;}
+      const monthsDiv=document.createElement("div");
+      monthsDiv.className="month-container";
+      months.forEach((m,i)=>{
+        const mDiv=document.createElement("div");
+        mDiv.className="month-box";
+        mDiv.textContent=m;
+        mDiv.addEventListener("click",()=>toggleDays(mDiv,year,i));
+        monthsDiv.appendChild(mDiv);
+      });
+      yDiv.after(monthsDiv);
     }
 
-    /* === Focus Zone (Creator sessions + 30-min checkboxes) === */
-    let activeSessionId = null;
-    let miniTimerInterval = null;
-    let miniTimerStart = null;
-
-    function setMiniTimerRunning(running){
-      const btnWith = document.getElementById('creatorWithBtn');
-      const btnNo   = document.getElementById('creatorNoBtn');
-      const stopBtn = document.getElementById('creatorStopBtn');
-      btnWith.disabled = running;
-      btnNo.disabled   = running;
-      stopBtn.disabled = !running;
-    }
-    function updateMiniTimer(){
-      if(!miniTimerStart) return;
-      const ms = Date.now() - miniTimerStart.getTime();
-      const m  = Math.floor(ms/60000);
-      const s  = Math.floor((ms%60000)/1000);
-      document.getElementById('miniTimer').textContent = `${pad(m)}:${pad(s)}`;
+    function toggleDays(mDiv,year,monthIndex){
+      let existing=mDiv.nextElementSibling;
+      if(existing&&existing.classList.contains("days-grid")){existing.remove();return;}
+      const grid=document.createElement("div");
+      grid.className="days-grid";
+      const daysInMonth=new Date(year,monthIndex+1,0).getDate();
+      for(let d=1;d<=daysInMonth;d++){
+        const btn=document.createElement("div");
+        btn.className="day-btn";
+        btn.textContent=d;
+        btn.addEventListener("click",()=>openDailyPage(year,monthIndex,d));
+        grid.appendChild(btn);
+      }
+      mDiv.after(grid);
     }
 
-    async function startCreatorSession(usage_type){
-      const user = await getCurrentUser();
-      if(!user) return alert('Please log in first');
-      if(activeSessionId) return;
-      const start_time = new Date().toISOString();
-      const { data, error } = await supabase.from('social_sessions')
-        .insert([{ user_id:user.id, usage_type, start_time }])
-        .select('id')
-        .single();
-      if(error){ alert('❌ ' + error.message); return; }
-      activeSessionId = data.id;
-      miniTimerStart = new Date();
-      setMiniTimerRunning(true);
-      miniTimerInterval = setInterval(updateMiniTimer, 1000);
-      updateMiniTimer();
-      document.getElementById('creatorStatus').textContent =
-        `Active: ${usage_type.replaceAll('_',' ')} — started at ${new Date().toLocaleTimeString()}`;
+    function openDailyPage(year,month,day){
+      document.getElementById("dateSelectorPage").style.display="none";
+      document.getElementById("mainApp").style.display="block";
+      document.getElementById("selectedDateHeader").textContent=`${day} ${months[month]} ${year}`;
+      window.currentDate=new Date(year,month,day);
+      setupDailyData();
     }
 
-    async function stopCreatorSession(){
-      const user = await getCurrentUser();
-      if(!user) return alert('Please log in first');
-      if(!activeSessionId) return;
-      const { error } = await supabase.from('social_sessions')
-        .update({ end_time:new Date().toISOString() })
-        .eq('id', activeSessionId)
-        .eq('user_id', user.id);
-      if(error){ alert('❌ ' + error.message); return; }
-      clearInterval(miniTimerInterval);
-      miniTimerInterval = null;
-      miniTimerStart = null;
-      setMiniTimerRunning(false);
-      document.getElementById('miniTimer').textContent = '00:00';
-      document.getElementById('creatorStatus').textContent = 'No active session.';
-      activeSessionId = null;
+    async function setupDailyData(){
+      const user=await getCurrentUser(); if(!user)return;
+      await loadEntriesFromDB(user.id);
+      buildCheckboxGrid(); await loadChecksForToday();
+    }
+
+    async function loadEntriesFromDB(userId){
+      const d=window.currentDate||new Date();
+      const from=startOfDayUtc(d).toISOString(); const to=nextDayUtc(d).toISOString();
+      const {data,error}=await supabase.from("logs").select("*").eq("user_id",userId).gte("start_time",from).lt("start_time",to).order("start_time",{ascending:false});
+      if(error)return console.error(error);
+      const tb=document.getElementById("entriesBody"); tb.innerHTML="";
+      data.forEach(r=>{
+        const start=new Date(r.start_time); const end=r.end_time?new Date(r.end_time):null;
+        const tr=document.createElement("tr");
+        tr.innerHTML=`<td>${fmtDate(start)}</td><td>${start.toLocaleTimeString()}</td><td>${end?end.toLocaleTimeString():"-"}</td><td>${r.activity||""}</td><td>${r.tag||""}</td><td>${r.notes||""}</td>`;
+        tb.appendChild(tr);
+      });
     }
 
     function buildCheckboxGrid(){
-      const grid = document.getElementById('slotsGrid');
-      grid.innerHTML = '';
+      const g=document.getElementById("slotsGrid"); g.innerHTML="";
       for(let i=0;i<48;i++){
-        const label = `${pad(Math.floor(i/2))}:${i%2===0?'00':'30'}`;
-        const row = document.createElement('div');
-        row.className = 'slot';
-        row.innerHTML = `
-          <span>${label}</span>
-          <input type="checkbox" id="slot-${i}" data-label="${label}" />
-        `;
-        grid.appendChild(row);
+        const label=`${pad(Math.floor(i/2))}:${i%2===0?"00":"30"}`;
+        const div=document.createElement("div");div.className="slot";
+        div.innerHTML=`<span>${label}</span><input type="checkbox" data-label="${label}">`;
+        g.appendChild(div);
       }
+      g.addEventListener("change",handleCheckToggle);
     }
 
     async function loadChecksForToday(){
-      const user = await getCurrentUser();
-      if(!user) return;
-      const today = new Date();
-      const from = startOfDayUtc(today).toISOString();
-      const to   = nextDayUtc(today).toISOString();
-      const { data, error } = await supabase.from('social_checks')
-        .select('slot_time, checked')
-        .eq('user_id', user.id)
-        .gte('slot_time', from)
-        .lt('slot_time', to);
-      if(error){ console.error(error); return; }
-      const map = new Map();
-      data?.forEach(r => {
-  // Convert UTC -> local time for display
-  const utc = new Date(r.slot_time);
-  const local = new Date(utc.getTime() + utc.getTimezoneOffset() * 60000);
-  const label = `${pad(local.getHours())}:${pad(local.getMinutes())}`;
-  map.set(label, !!r.checked);
-});
-
-      // populate
-      document.querySelectorAll('#slotsGrid input[type=checkbox]').forEach(cb=>{
-        const lbl = cb.dataset.label;
-        if(map.has(lbl)) cb.checked = map.get(lbl);
-      });
-      updateChecksSummary();
-    }
-
-    function updateChecksSummary(){
-      const all = document.querySelectorAll('#slotsGrid input[type=checkbox]').length;
-      const checked = document.querySelectorAll('#slotsGrid input[type=checkbox]:checked').length;
-      document.getElementById('checksSummary').textContent = `${checked}/${all} clean blocks today`;
+      const user=await getCurrentUser(); if(!user)return;
+      const d=window.currentDate||new Date();
+      const from=startOfDayUtc(d).toISOString(); const to=nextDayUtc(d).toISOString();
+      const {data,error}=await supabase.from("social_checks").select("slot_time,checked").eq("user_id",user.id).gte("slot_time",from).lt("slot_time",to);
+      if(error)return console.error(error);
+      const map=new Map(); data.forEach(r=>{const t=new Date(r.slot_time);map.set(`${pad(t.getHours())}:${pad(t.getMinutes())}`,!!r.checked);});
+      document.querySelectorAll("#slotsGrid input").forEach(cb=>{const lbl=cb.dataset.label;if(map.has(lbl))cb.checked=map.get(lbl);});
     }
 
     async function handleCheckToggle(e){
-      const cb = e.target;
-      if(cb.tagName !== 'INPUT') return;
-      const user = await getCurrentUser();
-      if(!user) { cb.checked = !cb.checked; return alert('Please log in first'); }
-      const label = cb.dataset.label; // "HH:MM" in local time
-      const today = new Date();
-      // build a local datetime for this slot, then convert to ISO
-      const [HH,MM] = label.split(':').map(n=>parseInt(n,10));
-      const localSlot = new Date(today.getFullYear(), today.getMonth(), today.getDate(), HH, MM, 0);
-      const slot_time = new Date(localSlot.getTime() - localSlot.getTimezoneOffset()*60000).toISOString(); // store in UTC
-      const { error } = await supabase.from('social_checks').upsert({
-        user_id: user.id,
-        slot_time,
-        checked: cb.checked
-      }, { onConflict: 'user_id,slot_time' });
-      if(error){ alert('❌ ' + error.message); cb.checked = !cb.checked; return; }
-      updateChecksSummary();
+      const cb=e.target; if(cb.tagName!=="INPUT")return;
+      const user=await getCurrentUser(); if(!user){cb.checked=!cb.checked;return alert("Login first");}
+      const label=cb.dataset.label; const d=window.currentDate||new Date();
+      const [H,M]=label.split(":").map(Number); const local=new Date(d.getFullYear(),d.getMonth(),d.getDate(),H,M);
+      const slot_time=new Date(local.getTime()-local.getTimezoneOffset()*60000).toISOString();
+      await supabase.from("social_checks").upsert({user_id:user.id,slot_time,checked:cb.checked},{onConflict:"user_id,slot_time"});
     }
 
-    /* === Page init === */
-    async function setupAfterLogin() {
-      const user = await getCurrentUser();
-      if (!user) return;
-      document.getElementById("authSection").style.display = "none";
-      document.getElementById("mainApp").style.display     = "block";
-      loadEntriesFromDB(user.id);
-      // focus zone
-      buildCheckboxGrid();
-      await loadChecksForToday();
+    function tickClock(){
+      const now=new Date(); const h=pad(now.getHours()),m=pad(now.getMinutes()),s=pad(now.getSeconds());
+      renderDigits("hoursSeg",h); renderDigits("minsSeg",m); renderDigits("secsSeg",s);
+    }
+    function renderDigits(id,str){
+      const seg=document.getElementById(id); seg.innerHTML="";
+      for(const ch of str){const el=document.createElement("div");el.className="flip";el.innerHTML=`<div class="card-face"><div class="half top"><div class="digit">${ch}</div></div><div class="half bottom"><div class="digit">${ch}</div></div></div>`;seg.appendChild(el);}
     }
 
-    window.addEventListener('DOMContentLoaded', async () => {
-      // default visibility
-      document.getElementById("mainApp").style.display     = "none";
-      document.getElementById("authSection").style.display = "block";
+    async function setupAfterLogin(){
+      const user=await getCurrentUser(); if(!user)return;
+      document.getElementById("authSection").style.display="none";
+      document.getElementById("dateSelectorPage").style.display="block";
+      buildDateSelector();
+    }
 
-      // flip clock tick
-      tickClock();
-      setInterval(tickClock, 1000);
-
-      // session check
-      const { data:{ session } } = await supabase.auth.getSession();
-      if (session?.user) setupAfterLogin();
-
-      // events
-      document.getElementById("authForm").addEventListener("submit", handleAuth);
-      document.getElementById("logoutBtn").addEventListener("click", handleLogout);
-      document.getElementById("clockInBtn").addEventListener("click", clockIn);
-      document.getElementById("clockOutBtn").addEventListener("click", clockOut);
-
-      // creator buttons (fixed + log)
-document.getElementById('creatorWithBtn').addEventListener('click', ()=>{
-  console.log("Inserting session with usage_type: with_social");
-  startCreatorSession('with_social');
-});
-document.getElementById('creatorNoBtn').addEventListener('click', ()=>{
-  console.log("Inserting session with usage_type: no_social");
-  startCreatorSession('no_social');
-});
-      document.getElementById('creatorStopBtn').addEventListener('click', stopCreatorSession);
-
-      // checkboxes
-      document.getElementById('slotsGrid')?.addEventListener('change', handleCheckToggle);
-
-      // UI defaults for creator zone
-      setMiniTimerRunning(false);
+    window.addEventListener("DOMContentLoaded",async()=>{
+      document.getElementById("mainApp").style.display="none";
+      document.getElementById("dateSelectorPage").style.display="none";
+      const {data:{session}}=await supabase.auth.getSession();
+      if(session?.user)setupAfterLogin();
+      document.getElementById("authForm").addEventListener("submit",handleAuth);
+      document.getElementById("logoutBtn").addEventListener("click",handleLogout);
+      setInterval(tickClock,1000);
     });
   </script>
 </head>
 <body>
   <div class="container">
-    <!-- AUTH SECTION -->
     <div id="authSection" class="card">
       <div class="section-title">Log in or Sign up</div>
       <form id="authForm">
@@ -397,103 +209,45 @@ document.getElementById('creatorNoBtn').addEventListener('click', ()=>{
       </form>
     </div>
 
-    <!-- MAIN APP SECTION -->
-    <div id="mainApp">
-      <div class="controls">
-        <label class="chip switch" title="Toggle light/dark">
-          <input id="themeToggle" type="checkbox" />
-          <span class="dot"></span><span>Light</span>
-        </label>
-        <label class="chip switch" title="Toggle 24h/12h">
-          <input id="formatToggle" type="checkbox" checked />
-          <span class="dot"></span><span>24-hour</span>
-        </label>
-        <button id="fullscreenBtn" class="btn">Full screen</button>
-        <button id="logoutBtn" class="btn ghost">Log out</button>
-        <button id="exportBtn" class="btn primary" title="Export entries to CSV">Export CSV</button>
-        <button id="clearBtn" class="btn ghost" title="Clear all entries">Clear All</button>
-      </div>
-
-      <div class="grid">
-        <!-- Flip Clock -->
-        <div class="card">
-          <div class="section-title">Flip Clock</div>
-          <div class="date-line" id="dateLine">—</div>
-          <div class="clock" aria-live="polite" style="margin-top:10px;">
-            <div class="segment" id="hoursSeg" aria-label="Hours"></div>
-            <div class="colon">:</div>
-            <div class="segment" id="minsSeg" aria-label="Minutes"></div>
-            <div class="colon">:</div>
-            <div class="segment" id="secsSeg" aria-label="Seconds"></div>
-          </div>
-          <div class="label" id="tzLabel">—</div>
-        </div>
-
-        <!-- Clock In / Out -->
-        <div class="card">
-          <div class="section-title">Clock In / Clock Out</div>
-          <form class="form" id="logForm" onsubmit="return false;">
-            <input type="text" id="activity" placeholder="What are you doing?" required />
-            <select id="category">
-              <option value="">No tag</option>
-              <option>Study</option>
-              <option>Work</option>
-              <option>Gym</option>
-              <option>Deep Work</option>
-              <option>Content</option>
-              <option>Admin</option>
-            </select>
-            <textarea id="notes" placeholder="Notes (optional)"></textarea>
-            <button id="clockInBtn" class="btn success" type="button">Clock In</button>
-            <button id="clockOutBtn" class="btn warn" type="button" disabled>Clock Out</button>
-          </form>
-          <div class="status" id="statusLine">Not tracking.</div>
-        </div>
-      </div>
-
-      <!-- Entries RIGHT AFTER clock in/out -->
-      <div class="card" style="width:100%; max-width:1100px;">
-        <div class="section-title">Entries</div>
-        <div style="overflow:auto;">
-          <table id="entriesTable" aria-label="Time entries">
-            <thead>
-              <tr>
-                <th>Date</th>
-                <th>Start</th>
-                <th>End</th>
-                <th class="right">Duration</th>
-                <th>Activity</th>
-                <th>Tag</th>
-                <th>Notes</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody id="entriesBody"></tbody>
-          </table>
-        </div>
-      </div>
-
-      <!-- Focus Zone AFTER entries -->
-      <div class="card" style="width:100%; max-width:1100px;">
-        <div class="section-title">Focus Zone — Creator Sessions & 30-min Checks</div>
-
-        <div class="form" style="align-items:center;">
-          <button id="creatorWithBtn" class="btn primary" type="button">Start Creator (With Social)</button>
-          <button id="creatorNoBtn" class="btn success" type="button">Start Creator (No Social)</button>
-          <button id="creatorStopBtn" class="btn warn" type="button" disabled>Stop</button>
-          <span style="margin-left:10px;">Session Timer: <span id="miniTimer" class="mini-timer">00:00</span></span>
-        </div>
-        <div class="status" id="creatorStatus" style="margin-top:6px;">No active session.</div>
-
-        <div style="margin:12px 0 6px;"><strong>Today’s 30-minute checkboxes</strong> — tick ✅ if you stayed off social:</div>
-        <div id="slotsGrid" style="display:grid; grid-template-columns:repeat(auto-fill,minmax(160px,1fr)); gap:8px;"></div>
-        <div class="date-line" id="checksSummary">—</div>
-      </div>
-
+    <div id="dateSelectorPage" class="date-selector">
+      <h2>Select Date</h2>
+      <div id="dateSelector"></div>
     </div>
 
-    <div class="footer">Made for <strong>Meri</strong> — Press <strong>F</strong> to toggle full screen • Press <strong>S</strong> to start/stop</div>
+    <div id="mainApp">
+      <div class="controls">
+        <button id="logoutBtn" class="btn ghost">Log out</button>
+        <button id="exportBtn" class="btn primary">Export CSV</button>
+        <button id="clearBtn" class="btn ghost">Clear All</button>
+      </div>
+      <h2 id="selectedDateHeader" style="text-align:center; margin-top:10px;"></h2>
+
+      <div class="card">
+        <div class="section-title">Flip Clock</div>
+        <div class="clock"><div id="hoursSeg" class="segment"></div><div class="colon">:</div><div id="minsSeg" class="segment"></div><div class="colon">:</div><div id="secsSeg" class="segment"></div></div>
+      </div>
+
+      <div class="card">
+        <div class="section-title">Clock In / Out</div>
+        <form class="form" onsubmit="return false;">
+          <input id="activity" placeholder="What are you doing?" />
+          <select id="category"><option>No tag</option><option>Study</option><option>Work</option><option>Gym</option></select>
+          <textarea id="notes" placeholder="Notes"></textarea>
+          <button id="clockInBtn" class="btn success" type="button">Clock In</button>
+          <button id="clockOutBtn" class="btn warn" type="button">Clock Out</button>
+        </form>
+      </div>
+
+      <div class="card">
+        <div class="section-title">Entries</div>
+        <table><thead><tr><th>Date</th><th>Start</th><th>End</th><th>Activity</th><th>Tag</th><th>Notes</th></tr></thead><tbody id="entriesBody"></tbody></table>
+      </div>
+
+      <div class="card">
+        <div class="section-title">Focus Zone — 30-min Checks</div>
+        <div id="slotsGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:8px;"></div>
+      </div>
+    </div>
   </div>
 </body>
 </html>
-
