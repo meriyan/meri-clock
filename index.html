@@ -230,6 +230,10 @@
       document.getElementById("logoutBtn").addEventListener("click", handleLogout);
       setInterval(tickClock, 1000);
 
+      // 💡 Remove any accidental second .clock on load
+const clocks = document.querySelectorAll('.clock');
+clocks.forEach((el, i) => { if (i > 0) el.remove(); });
+
       if (!session?.user) return;
       const saved = localStorage.getItem("meri_selected_date");
       if (saved) {
