@@ -146,6 +146,33 @@
       else     { alert("⏰ Clocked out!"); loadEntriesFromDB(user.id); }
     }
 
+
+    // Fetch and display saved entries
+async function loadEntries() {
+  const { data, error } = await supabase
+    .from("entries")
+    .select("*")
+    .order("start_time", { ascending: false });
+
+  if (error) {
+    console.error("Error loading entries:", error);
+    return;
+  }
+
+  const logList = document.getElementById("logList");
+  logList.innerHTML = ""; // clear the list
+
+  data.forEach((entry) => {
+    const div = document.createElement("div");
+    div.innerHTML = `
+      <p><strong>${entry.activity}</strong> — ${entry.tag || ""}<br>
+      ⏰ Start: ${new Date(entry.start_time).toLocaleString()}<br>
+      🕓 End: ${entry.end_time ? new Date(entry.end_time).toLocaleString() : "— still active —"}</p>
+      <hr>`;
+    logList.appendChild(div);
+  });
+}
+    
     // LOAD user’s logs
     async function loadEntriesFromDB(userId) {
       const { data, error } = await supabase
