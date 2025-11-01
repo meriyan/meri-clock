@@ -98,7 +98,25 @@
         </table>
       </div>
     </div>
+<div class="card" id="socialTracker">
+  <div class="section-title">Social Media Tracker (30-min Check-ins)</div>
 
+  <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin-bottom:8px;">
+    <button id="smStartBtn" class="btn success" type="button">Start Social Session</button>
+    <button id="smStopBtn"  class="btn warn"    type="button" disabled>Stop Session</button>
+    <button id="smProdBtn"  class="btn ghost"   type="button" disabled title="Mark last session as productive">Mark Productive</button>
+    <button id="smUnprodBtn"class="btn ghost"   type="button" disabled title="Mark last session as unproductive">Mark Unproductive</button>
+    <span id="smStatus" style="color:var(--muted)">No active session.</span>
+  </div>
+
+  <div style="margin:6px 0 10px;">
+    <strong>Today’s 30-min slots</strong> (tick ✅ if you stayed off social):
+  </div>
+
+  <div id="slotsGrid" style="display:grid; grid-template-columns:repeat(auto-fill,minmax(160px,1fr)); gap:8px;"></div>
+
+  <div class="date-line" id="smSummary">—</div>
+</div>
     <div class="footer">Made for <strong>Meri</strong></div>
   </div>
 
