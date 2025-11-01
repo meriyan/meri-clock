@@ -8,15 +8,15 @@
   <style>
 /* Define the color scheme for a sleek dark mode */
 :root {
-    --bg: #0d1117; 
-    --panel: #161b22; 
-    --card: #1f252d; 
-    --text: #c9d1d9; 
+    --bg: #0d1117; 
+    --panel: #161b22; 
+    --card: #1f252d; 
+    --text: #c9d1d9; 
     --accent: #58a6ff; /* A bright, modern blue */
-    --muted: #8b949e; 
-    --good: #3fb950; 
-    --warn: #d29922; 
-    --danger: #f85149; 
+    --muted: #8b949e; 
+    --good: #3fb950; 
+    --warn: #d29922; 
+    --danger: #f85149; 
     --shadow: rgba(0,0,0,0.5); /* Stronger shadow for depth */
 }
 
@@ -87,7 +87,7 @@ h2 {
     user-select: none;
     transition: all 0.2s ease;
 }
-.btn:hover:not(:disabled) { 
+.btn:hover:not(:disabled) { 
     background-color: var(--card);
     box-shadow: 0 0 0 2px var(--accent); /* Subtle glow on hover */
 }
@@ -134,14 +134,14 @@ h2 {
     border-color: var(--accent);
     box-shadow: 0 0 0 1px var(--accent);
 }
-#notes { 
-    flex-basis: 100%; 
-    resize: vertical; 
-    min-height: 80px; 
+#notes { 
+    flex-basis: 100%; 
+    resize: vertical; 
+    min-height: 80px; 
 }
-#clockInStatus { 
-    font-weight: 600; 
-    color: var(--good); 
+#clockInStatus { 
+    font-weight: 600; 
+    color: var(--good); 
     font-size: 1em;
     margin-top: 15px;
     padding: 8px;
@@ -252,9 +252,26 @@ tbody tr:hover {
 /* Responsive adjustments */
 @media (max-width: 600px) {
     .container {
-        padding: 1
+        padding: 15px 10px 60px; /* CORRECTED: Completed padding value and closed the brace */
+    }
+    .card {
+        padding: 15px;
+        margin-top: 15px;
+    }
+    .flip {
+        width: 60px;
+        height: 80px;
+    }
+    .digit {
+        font-size: 40px;
+    }
+    .colon {
+        font-size: 40px;
+    }
+}
   </style>
-          <script type="module">
+  
+  <script type="module">
     import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
     // NOTE: These keys are placeholder public keys for this demo structure
     const SUPABASE_URL="https://eqqunclfxzmfosjwzwki.supabase.co";
@@ -263,7 +280,7 @@ tbody tr:hover {
 
     const pad=n=>n.toString().padStart(2,"0");
     const months=["January","February","March","April","May","June","July","August","September","October","November","December"];
-    let clockInInterval, creatorSessionInterval, creatorStartTime;
+    let clockInInterval, creatorSessionInterval, creatorStartTime;
 
     function startOfDayUtc(d){const x=new Date(d.getFullYear(),d.getMonth(),d.getDate(),0,0,0);return new Date(x.getTime()-x.getTimezoneOffset()*60000);}
     function nextDayUtc(d){const x=new Date(d.getFullYear(),d.getMonth(),d.getDate()+1,0,0,0);return new Date(x.getTime()-x.getTimezoneOffset()*60000);}
@@ -352,33 +369,33 @@ tbody tr:hover {
       data?.forEach(r=>{
         const s=new Date(r.start_time);const e=r.end_time?new Date(r.end_time):null;
         // Calculate duration in hours/minutes if end_time exists
-        let duration = e ? formatDuration(e.getTime() - s.getTime()) : '';
-        
+        let duration = e ? formatDuration(e.getTime() - s.getTime()) : '';
+        
         const tr=document.createElement("tr");
         tr.innerHTML=`<td>${pad(s.getDate())}.${pad(s.getMonth()+1)}.${s.getFullYear()}</td><td>${s.toLocaleTimeString()}</td><td>${e?e.toLocaleTimeString():"-"}</td><td>${duration}</td><td>${r.activity||""}</td><td>${r.tag||""}</td><td>${r.notes||""}</td>`;
         tb.appendChild(tr);
       });
     }
 
-    function formatDuration(ms) {
-        const totalSeconds = Math.floor(ms / 1000);
-        const hours = Math.floor(totalSeconds / 3600);
-        const minutes = Math.floor((totalSeconds % 3600) / 60);
-        const seconds = totalSeconds % 60; 
+    function formatDuration(ms) {
+        const totalSeconds = Math.floor(ms / 1000);
+        const hours = Math.floor(totalSeconds / 3600);
+        const minutes = Math.floor((totalSeconds % 3600) / 60);
+        const seconds = totalSeconds % 60; 
 
-        let output = "";
-        if (hours > 0) output += `${hours}h `;
-        output += `${pad(minutes)}m`;
-        if (totalSeconds < 3600 && hours === 0) output += ` ${pad(seconds)}s`;
-        
-        return output.trim();
-    }
+        let output = "";
+        if (hours > 0) output += `${hours}h `;
+        output += `${pad(minutes)}m`;
+        if (totalSeconds < 3600 && hours === 0) output += ` ${pad(seconds)}s`;
+        
+        return output.trim();
+    }
 
     function buildCheckboxGrid(){
       const g=document.getElementById("slotsGrid");g.innerHTML="";
       for(let i=0;i<48;i++){
         const H = Math.floor(i/2);
-        const M = i%2===0?0:30;
+        const M = i%2===0?0:30;
         const lbl=`${pad(H)}:${pad(M)}`;
         const div=document.createElement("div");div.className="slot";
         div.innerHTML=`<span>${lbl}</span><input type="checkbox" data-label="${lbl}">`;
@@ -405,12 +422,12 @@ tbody tr:hover {
       await supabase.from("social_checks").upsert({user_id:user.id,slot_time:slot,checked:cb.checked},{onConflict:"user_id,slot_time"});
     }
 
-    // Renders the flip clock
+    // Renders the flip clock
     function tickClock() {
       const n = new Date();
       const h = pad(n.getHours()), m = pad(n.getMinutes()), s = pad(n.getSeconds());
 
-      // Clear and recreate the clock structure
+      // Clear and recreate the clock structure
       document.querySelector('.clock').innerHTML = `
         <div id="hoursSeg" class="segment"></div>
         <div class="colon">:</div>
@@ -419,7 +436,7 @@ tbody tr:hover {
         <div id="secsSeg" class="segment"></div>
       `;
 
-      // Render the digits into the newly created segments
+      // Render the digits into the newly created segments
       renderDigits("hoursSeg", h);
       renderDigits("minsSeg", m);
       renderDigits("secsSeg", s);
@@ -436,171 +453,171 @@ tbody tr:hover {
         seg.appendChild(e);
       }
     }
-    
-    // --- Clock In/Out Logic ---
-    async function handleClockIn() {
-        const user = await getCurrentUser(); if (!user) return alert("Please log in.");
-        const activity = document.getElementById("activity").value;
-        const tag = document.getElementById("category").value;
-        const notes = document.getElementById("notes").value;
-        if (!activity) return alert("Activity is required.");
+    
+    // --- Clock In/Out Logic ---
+    async function handleClockIn() {
+        const user = await getCurrentUser(); if (!user) return alert("Please log in.");
+        const activity = document.getElementById("activity").value;
+        const tag = document.getElementById("category").value;
+        const notes = document.getElementById("notes").value;
+        if (!activity) return alert("Activity is required.");
 
-        const start_time = new Date().toISOString();
-        const { error } = await supabase.from("logs").insert({ user_id: user.id, start_time, activity, tag, notes, end_time: null });
-        if (error) return alert("Clock In Error: " + error.message);
-        
-        localStorage.setItem("meri_clocked_in", start_time);
-        localStorage.setItem("meri_clocked_in_activity", activity);
-        localStorage.setItem("meri_clocked_in_tag", tag);
-        localStorage.setItem("meri_clocked_in_notes", notes);
-        
-        checkClockInStatus(user.id);
-        alert("Clocked In!");
-    }
+        const start_time = new Date().toISOString();
+        const { error } = await supabase.from("logs").insert({ user_id: user.id, start_time, activity, tag, notes, end_time: null });
+        if (error) return alert("Clock In Error: " + error.message);
+        
+        localStorage.setItem("meri_clocked_in", start_time);
+        localStorage.setItem("meri_clocked_in_activity", activity);
+        localStorage.setItem("meri_clocked_in_tag", tag);
+        localStorage.setItem("meri_clocked_in_notes", notes);
+        
+        checkClockInStatus(user.id);
+        alert("Clocked In!");
+    }
 
-    async function handleClockOut() {
-        const user = await getCurrentUser(); if (!user) return;
-        const clockedInTime = localStorage.getItem("meri_clocked_in");
-        if (!clockedInTime) return alert("You are not currently clocked in.");
+    async function handleClockOut() {
+        const user = await getCurrentUser(); if (!user) return;
+        const clockedInTime = localStorage.getItem("meri_clocked_in");
+        if (!clockedInTime) return alert("You are not currently clocked in.");
 
-        const end_time = new Date().toISOString();
-        const activity = localStorage.getItem("meri_clocked_in_activity");
-        const tag = localStorage.getItem("meri_clocked_in_tag");
-        const notes = localStorage.getItem("meri_clocked_in_notes");
+        const end_time = new Date().toISOString();
+        const activity = localStorage.getItem("meri_clocked_in_activity");
+        const tag = localStorage.getItem("meri_clocked_in_tag");
+        const notes = localStorage.getItem("meri_clocked_in_notes");
 
-        // Find the last open log entry and update it
-        const { data: logs, error: selectError } = await supabase.from("logs")
-            .select("id")
-            .eq("user_id", user.id)
-            .eq("start_time", clockedInTime)
-            .is("end_time", null)
-            .order("start_time", { ascending: false })
-            .limit(1);
+        // Find the last open log entry and update it
+        const { data: logs, error: selectError } = await supabase.from("logs")
+            .select("id")
+            .eq("user_id", user.id)
+            .eq("start_time", clockedInTime)
+            .is("end_time", null)
+            .order("start_time", { ascending: false })
+            .limit(1);
 
-        if (selectError) return alert("Clock Out Error (Select): " + selectError.message);
-        if (logs.length === 0) return alert("Could not find the start log entry.");
+        if (selectError) return alert("Clock Out Error (Select): " + selectError.message);
+        if (logs.length === 0) return alert("Could not find the start log entry.");
 
-        const { error: updateError } = await supabase.from("logs")
-            .update({ end_time, activity, tag, notes })
-            .eq("id", logs[0].id);
+        const { error: updateError } = await supabase.from("logs")
+            .update({ end_time, activity, tag, notes })
+            .eq("id", logs[0].id);
 
-        if (updateError) return alert("Clock Out Error (Update): " + updateError.message);
+        if (updateError) return alert("Clock Out Error (Update): " + updateError.message);
 
-        localStorage.removeItem("meri_clocked_in");
-        localStorage.removeItem("meri_clocked_in_activity");
-        localStorage.removeItem("meri_clocked_in_tag");
-        localStorage.removeItem("meri_clocked_in_notes");
+        localStorage.removeItem("meri_clocked_in");
+        localStorage.removeItem("meri_clocked_in_activity");
+        localStorage.removeItem("meri_clocked_in_tag");
+        localStorage.removeItem("meri_clocked_in_notes");
 
-        checkClockInStatus(user.id);
-        await loadEntries(user.id); // Reload table
-        alert("Clocked Out!");
-    }
-    
-    // Function to update the clock-in status message and timer every second
-    function updateClockInTimer(startTime) {
-        const elapsedMs = new Date().getTime() - new Date(startTime).getTime();
-        const durationText = formatDuration(elapsedMs);
-        const activity = localStorage.getItem("meri_clocked_in_activity");
-        const statusText = `Clocked In to: **${activity}** | Duration: **${durationText}**`;
-        document.querySelector('#clockInStatus').innerHTML = statusText;
-    }
+        checkClockInStatus(user.id);
+        await loadEntries(user.id); // Reload table
+        alert("Clocked Out!");
+    }
+    
+    // Function to update the clock-in status message and timer every second
+    function updateClockInTimer(startTime) {
+        const elapsedMs = new Date().getTime() - new Date(startTime).getTime();
+        const durationText = formatDuration(elapsedMs);
+        const activity = localStorage.getItem("meri_clocked_in_activity");
+        const statusText = `Clocked In to: **${activity}** | Duration: **${durationText}**`;
+        document.querySelector('#clockInStatus').innerHTML = statusText;
+    }
 
-    function checkClockInStatus(uid) {
-        const isClockedIn = localStorage.getItem("meri_clocked_in");
-        document.getElementById("clockInBtn").disabled = !!isClockedIn;
-        document.getElementById("clockOutBtn").disabled = !isClockedIn;
-        
-        // Restore input fields
-        document.getElementById("activity").value = localStorage.getItem("meri_clocked_in_activity") || '';
-        document.getElementById("category").value = localStorage.getItem("meri_clocked_in_tag") || '';
-        document.getElementById("notes").value = localStorage.getItem("meri_clocked_in_notes") || '';
+    function checkClockInStatus(uid) {
+        const isClockedIn = localStorage.getItem("meri_clocked_in");
+        document.getElementById("clockInBtn").disabled = !!isClockedIn;
+        document.getElementById("clockOutBtn").disabled = !isClockedIn;
+        
+        // Restore input fields
+        document.getElementById("activity").value = localStorage.getItem("meri_clocked_in_activity") || '';
+        document.getElementById("category").value = localStorage.getItem("meri_clocked_in_tag") || '';
+        document.getElementById("notes").value = localStorage.getItem("meri_clocked_in_notes") || '';
 
-        if (isClockedIn) {
-            // Disable input fields while clocked in
-            document.getElementById("activity").disabled = true;
-            document.getElementById("category").disabled = true;
-            document.getElementById("notes").disabled = true;
-            
-            if (!clockInInterval) {
-                // Initial update and start interval
-                updateClockInTimer(isClockedIn);
-                clockInInterval = setInterval(() => updateClockInTimer(isClockedIn), 1000);
-            }
-        } else {
-            // Enable input fields when clocked out
-            document.getElementById("activity").disabled = false;
-            document.getElementById("category").disabled = false;
-            document.getElementById("notes").disabled = false;
+        if (isClockedIn) {
+            // Disable input fields while clocked in
+            document.getElementById("activity").disabled = true;
+            document.getElementById("category").disabled = true;
+            document.getElementById("notes").disabled = true;
+            
+            if (!clockInInterval) {
+                // Initial update and start interval
+                updateClockInTimer(isClockedIn);
+                clockInInterval = setInterval(() => updateClockInTimer(isClockedIn), 1000);
+            }
+        } else {
+            // Enable input fields when clocked out
+            document.getElementById("activity").disabled = false;
+            document.getElementById("category").disabled = false;
+            document.getElementById("notes").disabled = false;
 
-            if (clockInInterval) {
-                clearInterval(clockInInterval);
-                clockInInterval = null;
-            }
-            document.querySelector('#clockInStatus').innerHTML = "Not currently clocked in.";
-        }
-    }
-    
-    // --- Creator Session Logic ---
-    function updateMiniTimer() {
-        if (!creatorStartTime) return;
-        const elapsed = new Date().getTime() - creatorStartTime.getTime();
-        const totalSeconds = Math.floor(elapsed / 1000);
-        const minutes = pad(Math.floor(totalSeconds / 60));
-        const seconds = pad(totalSeconds % 60);
-        document.getElementById("miniTimer").textContent = `${minutes}:${seconds}`;
-    }
+            if (clockInInterval) {
+                clearInterval(clockInInterval);
+                clockInInterval = null;
+            }
+            document.querySelector('#clockInStatus').innerHTML = "Not currently clocked in.";
+        }
+    }
+    
+    // --- Creator Session Logic ---
+    function updateMiniTimer() {
+        if (!creatorStartTime) return;
+        const elapsed = new Date().getTime() - creatorStartTime.getTime();
+        const totalSeconds = Math.floor(elapsed / 1000);
+        const minutes = pad(Math.floor(totalSeconds / 60));
+        const seconds = pad(totalSeconds % 60);
+        document.getElementById("miniTimer").textContent = `${minutes}:${seconds}`;
+    }
 
-    function startCreator(type) {
-        if (creatorSessionInterval) return alert("A session is already running. Please stop it first.");
-        creatorStartTime = new Date();
-        localStorage.setItem("meri_creator_session_start", creatorStartTime.toISOString());
-        localStorage.setItem("meri_creator_session_type", type);
+    function startCreator(type) {
+        if (creatorSessionInterval) return alert("A session is already running. Please stop it first.");
+        creatorStartTime = new Date();
+        localStorage.setItem("meri_creator_session_start", creatorStartTime.toISOString());
+        localStorage.setItem("meri_creator_session_type", type);
 
-        document.getElementById("creatorWithBtn").disabled = true;
-        document.getElementById("creatorNoBtn").disabled = true;
-        document.getElementById("creatorStopBtn").disabled = false;
-        
-        document.getElementById("creatorStatus").textContent = `Session Active: ${type === 'social' ? 'With Social' : 'No Social'}`;
-        
-        creatorSessionInterval = setInterval(updateMiniTimer, 1000);
-        updateMiniTimer();
-    }
+        document.getElementById("creatorWithBtn").disabled = true;
+        document.getElementById("creatorNoBtn").disabled = true;
+        document.getElementById("creatorStopBtn").disabled = false;
+        
+        document.getElementById("creatorStatus").textContent = `Session Active: ${type === 'social' ? 'With Social' : 'No Social'}`;
+        
+        creatorSessionInterval = setInterval(updateMiniTimer, 1000);
+        updateMiniTimer();
+    }
 
-    async function stopCreator() {
-        if (!creatorSessionInterval) return alert("No active session to stop.");
-        clearInterval(creatorSessionInterval);
-        creatorSessionInterval = null;
-        
-        const type = localStorage.getItem("meri_creator_session_type");
-        const start = localStorage.getItem("meri_creator_session_start");
-        const end = new Date().toISOString();
-        
-        // Log the session as a "Work" log entry
-        const user = await getCurrentUser();
-        if (user && start) {
-            
-            const activity = `Creator Session (${type === 'social' ? 'With Social' : 'No Social'})`;
-            const tag = 'Deep Work';
-            await supabase.from("logs").insert({ 
-                user_id: user.id, 
-                start_time: start, 
-                end_time: end, 
-                activity: activity, 
-                tag: tag,
-                notes: `Duration: ${formatDuration(new Date(end).getTime() - new Date(start).getTime())}`
-            });
-            await loadEntries(user.id);
-        }
-        
-        localStorage.removeItem("meri_creator_session_start");
-        localStorage.removeItem("meri_creator_session_type");
+    async function stopCreator() {
+        if (!creatorSessionInterval) return alert("No active session to stop.");
+        clearInterval(creatorSessionInterval);
+        creatorSessionInterval = null;
+        
+        const type = localStorage.getItem("meri_creator_session_type");
+        const start = localStorage.getItem("meri_creator_session_start");
+        const end = new Date().toISOString();
+        
+        // Log the session as a "Work" log entry
+        const user = await getCurrentUser();
+        if (user && start) {
+            
+            const activity = `Creator Session (${type === 'social' ? 'With Social' : 'No Social'})`;
+            const tag = 'Deep Work';
+            await supabase.from("logs").insert({ 
+                user_id: user.id, 
+                start_time: start, 
+                end_time: end, 
+                activity: activity, 
+                tag: tag,
+                notes: `Duration: ${formatDuration(new Date(end).getTime() - new Date(start).getTime())}`
+            });
+            await loadEntries(user.id);
+        }
+        
+        localStorage.removeItem("meri_creator_session_start");
+        localStorage.removeItem("meri_creator_session_type");
 
-        document.getElementById("creatorWithBtn").disabled = false;
-        document.getElementById("creatorNoBtn").disabled = false;
-        document.getElementById("creatorStopBtn").disabled = true;
-        document.getElementById("creatorStatus").textContent = "No active session.";
-        document.getElementById("miniTimer").textContent = "00:00";
-    }
+        document.getElementById("creatorWithBtn").disabled = false;
+        document.getElementById("creatorNoBtn").disabled = false;
+        document.getElementById("creatorStopBtn").disabled = true;
+        document.getElementById("creatorStatus").textContent = "No active session.";
+        document.getElementById("miniTimer").textContent = "00:00";
+    }
 
 
     async function setupAfterLogin(){
@@ -617,16 +634,16 @@ tbody tr:hover {
         document.getElementById("dateSelectorPage").style.display="block";
         buildDateSelector();
       }
-      // Re-check creator session state on refresh
-      if (localStorage.getItem("meri_creator_session_start")) {
-          creatorStartTime = new Date(localStorage.getItem("meri_creator_session_start"));
-          const type = localStorage.getItem("meri_creator_session_type");
-          document.getElementById("creatorWithBtn").disabled = true;
-          document.getElementById("creatorNoBtn").disabled = true;
-          document.getElementById("creatorStopBtn").disabled = false;
-          document.getElementById("creatorStatus").textContent = `Session Active: ${type === 'social' ? 'With Social' : 'No Social'}`;
-          creatorSessionInterval = setInterval(updateMiniTimer, 1000);
-      }
+      // Re-check creator session state on refresh
+      if (localStorage.getItem("meri_creator_session_start")) {
+          creatorStartTime = new Date(localStorage.getItem("meri_creator_session_start"));
+          const type = localStorage.getItem("meri_creator_session_type");
+          document.getElementById("creatorWithBtn").disabled = true;
+          document.getElementById("creatorNoBtn").disabled = true;
+          document.getElementById("creatorStopBtn").disabled = false;
+          document.getElementById("creatorStatus").textContent = `Session Active: ${type === 'social' ? 'With Social' : 'No Social'}`;
+          creatorSessionInterval = setInterval(updateMiniTimer, 1000);
+      }
     }
 
     window.addEventListener("DOMContentLoaded", async () => {
@@ -636,25 +653,25 @@ tbody tr:hover {
       const { data: { session } } = await supabase.auth.getSession();
       document.getElementById("authForm").addEventListener("submit", handleAuth);
       document.getElementById("logoutBtn").addEventListener("click", handleLogout);
-      
-      // Clock In/Out Listeners
-      document.getElementById("clockInBtn").addEventListener("click", handleClockIn);
-      document.getElementById("clockOutBtn").addEventListener("click", handleClockOut);
+      
+      // Clock In/Out Listeners
+      document.getElementById("clockInBtn").addEventListener("click", handleClockIn);
+      document.getElementById("clockOutBtn").addEventListener("click", handleClockOut);
 
-      // Creator Session Listeners
-      document.getElementById("creatorWithBtn").addEventListener("click", () => startCreator('social'));
-      document.getElementById("creatorNoBtn").addEventListener("click", () => startCreator('no-social'));
-      document.getElementById("creatorStopBtn").addEventListener("click", stopCreator);
-      
-      // Initialize the clock interval
+      // Creator Session Listeners
+      document.getElementById("creatorWithBtn").addEventListener("click", () => startCreator('social'));
+      document.getElementById("creatorNoBtn").addEventListener("click", () => startCreator('no-social'));
+      document.getElementById("creatorStopBtn").addEventListener("click", stopCreator);
+      
+      // Initialize the clock interval
       setInterval(tickClock, 1000);
 
       if (!session?.user) {
-          document.getElementById("authSection").style.display = "block";
-          return;
-      }
-      
-      await setupAfterLogin();
+          document.getElementById("authSection").style.display = "block";
+          return;
+      }
+      
+      await setupAfterLogin();
     });
   </script>
 </head>
@@ -706,7 +723,7 @@ tbody tr:hover {
           <button id="clockInBtn" class="btn success" type="button">Clock In</button>
           <button id="clockOutBtn" class="btn warn" type="button" disabled>Clock Out</button>
         </form>
-        <div id="clockInStatus" style="margin-top:10px; color:var(--muted);">Not currently clocked in.</div>
+        <div id="clockInStatus" style="margin-top:10px; color:var(--muted);">Not currently clocked in.</div>
       </div>
 ---
   <div class="card">
@@ -744,8 +761,9 @@ tbody tr:hover {
               grid-template-columns:repeat(auto-fill,minmax(200px,1fr));
               gap:8px;
               margin-top:12px;">
-      </div>
+        </div>
 </div>
-</div> </div> </body>
+</div> 
+</div> 
+</body>
 </html>
-      
