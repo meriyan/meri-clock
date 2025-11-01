@@ -4,286 +4,727 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Meri — Daily Tracker</title>
-  
+
   <style>
-/* Define the color scheme for a sleek dark mode */
-:root {
-    --bg: #0d1117; 
-    --panel: #161b22; 
-    --card: #1f252d; 
-    --text: #c9d1d9; 
-    --accent: #58a6ff;
-    --muted: #8b949e; 
-    --good: #3fb950; 
-    --warn: #d29922; 
-    --danger: #f85149; 
-    --shadow: rgba(0,0,0,0.5);
-}
+    :root{
+      --bg:#0b0f14;
+      --panel:#121722;
+      --card:#171d2a;
+      --text:#e6edf3;
+      --muted:#9aa4b2;
+      --accent:#6ab7ff;         /* blue accent */
+      --pink:#ff73b3;           /* pink accent you asked for */
+      --good:#3fb950;
+      --warn:#d29922;
+      --danger:#f85149;
+      --ring:rgba(106,183,255,.25);
+      --shadow:rgba(0,0,0,.5);
+      --grid: #2a3344;
+      --chip:#1f2736;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%;margin:0;background:radial-gradient(1200px 800px at 80% -10%, rgba(255,115,179,.08), transparent 50%), linear-gradient(0deg, #0b0f14, #0b0f14);color:var(--text);font:16px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;}
+    .container{min-height:100%;display:flex;flex-direction:column;align-items:center;padding:28px 16px 96px;gap:16px}
+    .brand{display:flex;align-items:center;gap:10px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:#fff}
+    .badge{padding:6px 10px;border-radius:999px;background:linear-gradient(135deg, var(--pink), #b67eff);font-weight:700;font-size:12px;color:#081018;box-shadow:0 6px 24px rgba(255,115,179,.25)}
 
-html, body {
-    height: 100%;
-    margin: 0;
-    background: var(--bg);
-    color: var(--text);
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    font-size: 16px;
-}
+    .row{display:grid;grid-template-columns:repeat(12,1fr);gap:16px;width:100%;max-width:1100px}
+    .card{grid-column:span 12;background:var(--card);border:1px solid #1d2535;border-radius:16px;box-shadow:0 14px 40px var(--shadow);padding:18px}
+    .section-title{display:flex;align-items:center;gap:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;font-size:12px;color:var(--accent);margin-bottom:12px;border-bottom:1px solid #212a3c;padding-bottom:8px}
+    .section-title .dot{width:8px;height:8px;border-radius:50%;background:linear-gradient(135deg, var(--pink), #ffd1e6);box-shadow:0 0 0 4px rgba(255,115,179,.12)}
+    .controls{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+    .spacer{flex:1}
+    .btn{background:var(--chip);color:var(--text);border:1px solid #273049;border-radius:10px;padding:10px 14px;font-weight:600;cursor:pointer;transition:.18s;user-select:none}
+    .btn:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 0 0 3px var(--ring)}
+    .btn:disabled{opacity:.45;cursor:not-allowed}
+    .btn.primary{background:linear-gradient(135deg,var(--accent),#9dd1ff);color:#081018;border-color:transparent}
+    .btn.success{background:linear-gradient(135deg,#3fb950,#7be389);color:#06140a;border-color:transparent}
+    .btn.warn{background:linear-gradient(135deg,#ffcc66,#d29922);color:#0f0b00;border-color:transparent}
+    .btn.pink{background:linear-gradient(135deg, var(--pink), #ffd1e6);color:#2a0b19;border-color:transparent}
 
-.container {
-    min-height: 100%;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 30px 20px 80px;
-}
+    .form{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+    .form input,.form select,.form textarea{
+      background:var(--panel);color:var(--text);border:1px solid #2a3344;border-radius:10px;
+      padding:10px 12px;outline:none;min-width:160px;flex:1;transition:border-color .18s, box-shadow .18s;
+    }
+    .form textarea{min-height:84px;resize:vertical;flex-basis:100%}
+    .form input:focus,.form select:focus,.form textarea:focus{border-color:var(--accent);box-shadow:0 0 0 2px var(--ring)}
 
-.card {
-    background: var(--card);
-    border: 1px solid var(--panel);
-    border-radius: 16px;
-    box-shadow: 0 10px 30px var(--shadow);
-    padding: 20px;
-    max-width: 1000px;
-    width: 100%;
-    margin-top: 25px;
-    transition: transform 0.2s;
-}
+    .clock-wrap{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px}
+    .clock{
+      font-variant-numeric:tabular-nums;
+      font-weight:800;
+      font-size:48px;
+      letter-spacing:2px;
+      padding:12px 16px;
+      border-radius:12px;
+      background:linear-gradient(180deg,#101625,#0c111b);
+      border:1px solid #263049;
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.02);
+    }
+    .date-line{color:var(--muted);font-weight:600}
 
-.section-title {
-    font-weight: 700;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    font-size: 14px;
-    color: var(--accent);
-    margin: 0 0 15px;
-    border-bottom: 2px solid var(--panel);
-    padding-bottom: 8px;
-}
+    table{width:100%;border-collapse:separate;border-spacing:0;margin-top:12px;font-size:.92em}
+    thead th{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);border-bottom:1px solid #25304a;padding:10px}
+    tbody td{padding:12px 10px;border-bottom:1px solid #222c40}
+    tbody tr:hover{background:rgba(106,183,255,.06)}
 
-h2 { color: var(--text); font-weight: 600; }
+    .grid{display:grid;grid-template-columns:repeat(12,1fr);gap:16px}
+    .col-6{grid-column:span 6}
+    .col-4{grid-column:span 4}
+    .col-8{grid-column:span 8}
+    .col-12{grid-column:span 12}
 
-.controls {
-    display: flex;
-    gap: 15px;
-    flex-wrap: wrap;
-    align-items: center;
-    justify-content: center;
-}
+    .status-chip{display:inline-flex;align-items:center;gap:8px;background:var(--chip);border:1px solid #273049;border-radius:999px;padding:8px 12px;font-weight:700}
+    .status-chip .pill{width:10px;height:10px;border-radius:999px;background:var(--good);box-shadow:0 0 0 4px rgba(63,185,80,.18)}
 
-.btn {
-    background: var(--panel);
-    color: var(--text);
-    border: none;
-    border-radius: 8px;
-    padding: 12px 18px;
-    font-weight: 500;
-    cursor: pointer;
-    user-select: none;
-    transition: all 0.2s ease;
-}
-.btn:hover:not(:disabled) { background-color: var(--card); box-shadow: 0 0 0 2px var(--accent); }
-.btn.primary { background: var(--accent); color: #fff; }
-.btn.success { background: var(--good); color: #fff; }
-.btn.warn { background: var(--warn); color: var(--bg); }
-.btn.ghost { background: transparent; border: 1px solid var(--muted); }
-.btn:disabled { opacity: 0.4; cursor: not-allowed; }
+    .slots-grid{
+      display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));
+      gap:8px;margin-top:12px
+    }
+    .slot{display:flex;align-items:center;justify-content:space-between;background:var(--panel);
+      padding:10px 12px;border-radius:10px;border:1px solid #273049}
+    .slot:hover{background:#1b2333}
+    .mini-timer{font-weight:800;font-variant-numeric:tabular-nums;color:var(--accent)}
+    .hint{color:var(--muted);font-size:.9em}
 
-.form {
-    display: flex;
-    gap: 10px;
-    flex-wrap: wrap;
-    align-items: center;
-}
-.form input, .form select, .form textarea {
-    background: var(--panel);
-    color: var(--text);
-    border: 1px solid #30363d;
-    border-radius: 8px;
-    padding: 10px 12px;
-    outline: none;
-    flex-grow: 1;
-    min-width: 150px;
-    transition: border-color 0.2s;
-}
-.form input:focus, .form select:focus, .form textarea:focus {
-    border-color: var(--accent);
-    box-shadow: 0 0 0 1px var(--accent);
-}
-#notes { flex-basis: 100%; resize: vertical; min-height: 80px; }
-#clockInStatus { font-weight: 600; color: var(--good); font-size: 1em; margin-top: 15px; padding: 8px; background: rgba(63,185,80,0.1); border-radius: 8px; }
+    /* Date selector */
+    .date-selector .year-box{cursor:pointer;background:var(--panel);border:1px solid #273049;border-radius:10px;padding:10px 12px;margin:8px 0;font-weight:700}
+    .month-container{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:8px;margin:8px 0}
+    .month-box{cursor:pointer;background:var(--chip);border:1px solid #273049;border-radius:10px;padding:10px 12px;font-weight:700}
+    .days-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(52px,1fr));gap:6px;margin:8px 0}
+    .day-btn{cursor:pointer;text-align:center;background:var(--panel);border:1px solid #273049;border-radius:10px;padding:8px 0;font-weight:700}
+    .day-btn:hover{box-shadow:0 0 0 3px var(--ring)}
 
-.clock {
-    display: flex;
-    gap: 20px;
-    align-items: center;
-    justify-content: center;
-    flex-wrap: wrap;
-    margin: 10px 0;
-}
-.colon {
-    font-weight: 800;
-    font-size: 56px;
-    color: var(--muted);
-    position: relative;
-    top: -10px;
-}
-.flip {
-    position: relative;
-    width: 80px;
-    height: 100px;
-    perspective: 1000px;
-}
-.card-face {
-    position: relative;
-    width: 100%;
-    height: 100%;
-    border-radius: 12px;
-    background: linear-gradient(180deg, var(--card), #12161b);
-    border: 1px solid var(--panel);
-    box-shadow: 0 4px 15px rgba(0,0,0,0.4);
-    overflow: hidden;
-}
-.digit {
-    font-size: 60px;
-    font-weight: 700;
-    color: var(--accent);
-}
-.half {
-    position: absolute;
-    left: 0;
-    right: 0;
-    height: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-variant-numeric: tabular-nums;
-}
-.top { top: 0; border-bottom: 1px solid rgba(0,0,0,0.35); }
-.bottom { bottom: 0; }
-
-table {
-    width: 100%;
-    border-collapse: separate;
-    border-spacing: 0;
-    margin-top: 15px;
-    font-size: 0.9em;
-}
-th, td { padding: 12px 10px; text-align: left; border-bottom: 1px solid #30363d; }
-thead th { font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
-tbody tr:last-child td { border-bottom: none; }
-tbody tr:hover { background-color: rgba(90,166,255,0.05); }
-
-.mini-timer { font-weight: 800; font-variant-numeric: tabular-nums; color: var(--accent); }
-.slot { display: flex; align-items: center; justify-content: space-between; background: var(--panel); padding: 10px 12px; border-radius: 6px; transition: background-color 0.2s; }
-.slot:hover { background: #262e38; }
-
-@media (max-width: 600px) {
-    .container { padding: 15px 10px 60px; }
-    .card { padding: 15px; margin-top: 15px; }
-    .flip { width: 60px; height: 80px; }
-    .digit { font-size: 40px; }
-    .colon { font-size: 40px; }
-}
+    /* Responsive */
+    @media (max-width: 900px){
+      .col-6,.col-4,.col-8{grid-column:span 12}
+      .clock{font-size:40px}
+    }
   </style>
-  
+
   <script type="module">
     import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-    const SUPABASE_URL="https://eqqunclfxzmfosjwzwki.supabase.co";
-    const SUPABASE_ANON_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVxcXVuY2xmeHptZm9zand6d2tpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjE5NDg1MDQsImV4cCI6MjA3NzUyNDUwNH0.1N5pYTxFf6PjCMgQ0nUICsc9jLL58LuDZgX_s8yLe_w";
-    const supabase=createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
 
-    const pad=n=>n.toString().padStart(2,"0");
-    const months=["January","February","March","April","May","June","July","August","September","October","November","December"];
-    let clockInInterval, creatorSessionInterval, creatorStartTime;
+    // === Supabase (unchanged details as requested) ===
+    const SUPABASE_URL = "https://eqqunclfxzmfosjwzwki.supabase.co";
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVxcXVuY2xmeHptZm9zand6d2tpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjE5NDg1MDQsImV4cCI6MjA3NzUyNDUwNH0.1N5pYTxFf6PjCMgQ0nUICsc9jLL58LuDZgX_s8yLe_w";
+    const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-    function startOfDayUtc(d){const x=new Date(d.getFullYear(),d.getMonth(),d.getDate(),0,0,0);return new Date(x.getTime()-x.getTimezoneOffset()*60000);}
-    function nextDayUtc(d){const x=new Date(d.getFullYear(),d.getMonth(),d.getDate()+1,0,0,0);return new Date(x.getTime()-x.getTimezoneOffset()*60000);}
-    async function getCurrentUser(){const {data:{user}}=await supabase.auth.getUser();return user;}
+    // === Utilities ===
+    const pad = n => n.toString().padStart(2,"0");
+    const months = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+    const weekdays = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
 
+    function startOfDayUtc(d){
+      const x = new Date(d.getFullYear(), d.getMonth(), d.getDate(), 0, 0, 0);
+      return new Date(x.getTime() - x.getTimezoneOffset() * 60000);
+    }
+    function nextDayUtc(d){
+      const x = new Date(d.getFullYear(), d.getMonth(), d.getDate()+1, 0, 0, 0);
+      return new Date(x.getTime() - x.getTimezoneOffset() * 60000);
+    }
+    function formatDuration(ms){
+      const totalSeconds = Math.floor(ms/1000);
+      const h = Math.floor(totalSeconds/3600);
+      const m = Math.floor((totalSeconds%3600)/60);
+      const s = totalSeconds%60;
+      let out = "";
+      if(h>0) out += `${h}h `;
+      out += `${pad(m)}m`;
+      if(h===0) out += ` ${pad(s)}s`;
+      return out.trim();
+    }
+    function toIsoLocalAsUtc(date){
+      // store slots as UTC-in-ISO representing local wall time
+      return new Date(date.getTime() - date.getTimezoneOffset()*60000).toISOString();
+    }
+
+    // === State ===
+    let clockTimer = null;
+    let creatorTimer = null;
+    let creatorStart = null;
+
+    // === Auth ===
+    async function getCurrentUser(){
+      const { data:{ user } } = await supabase.auth.getUser();
+      return user;
+    }
     async function handleAuth(e){
       e.preventDefault();
-      const email=document.getElementById("authEmail").value;
-      const password=document.getElementById("authPassword").value;
-      let {error}=await supabase.auth.signInWithPassword({email,password});
+      const email = document.getElementById("authEmail").value.trim();
+      const password = document.getElementById("authPassword").value;
+      let { error } = await supabase.auth.signInWithPassword({ email, password });
       if(error){
-        const {error:e2}=await supabase.auth.signUp({email,password});
-        if(e2)return alert("Auth error: "+e2.message);
-        alert("Signup successful! Please log in.");
-      } else alert("Login successful!");
+        const { error: e2 } = await supabase.auth.signUp({ email, password });
+        if(e2){ alert("Auth error: " + e2.message); return; }
+        alert("Signup successful! Please log in again.");
+      } else {
+        alert("Login successful!");
+      }
       setupAfterLogin();
     }
+    async function handleLogout(){
+      await supabase.auth.signOut();
+      localStorage.removeItem("meri_selected_date");
+      localStorage.removeItem("meri_clocked_in");
+      localStorage.removeItem("meri_clocked_in_activity");
+      localStorage.removeItem("meri_clocked_in_tag");
+      localStorage.removeItem("meri_clocked_in_notes");
+      localStorage.removeItem("meri_creator_session_start");
+      localStorage.removeItem("meri_creator_session_type");
+      location.reload();
+    }
 
-    async function handleLogout(){await supabase.auth.signOut();localStorage.removeItem("meri_selected_date");location.reload();}
+    // === Simple Digital Clock (no duplicate rendering) ===
+    function startClock(){
+      const t = document.getElementById("clockText");
+      const d = document.getElementById("dateText");
+      const tick = () => {
+        const now = new Date();
+        const hh = pad(now.getHours());
+        const mm = pad(now.getMinutes());
+        const ss = pad(now.getSeconds());
+        t.textContent = `${hh}:${mm}:${ss}`;
+        d.textContent = `${weekdays[now.getDay()]}, ${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()}`;
+      };
+      tick();
+      if(clockTimer) clearInterval(clockTimer);
+      clockTimer = setInterval(tick, 1000);
+    }
 
-    // ✅ FIXED tickClock
-    function tickClock() {
-      const n = new Date();
-      const h = pad(n.getHours());
-      const m = pad(n.getMinutes());
-      const s = pad(n.getSeconds());
+    // === Date Selector ===
+    function buildDateSelector(){
+      const holder = document.getElementById("dateSelector");
+      holder.innerHTML = "";
+      for(let y=2025; y<=2030; y++){
+        const yDiv = document.createElement("div");
+        yDiv.className = "year-box";
+        yDiv.textContent = y;
+        yDiv.addEventListener("click", ()=>toggleMonths(yDiv,y));
+        holder.appendChild(yDiv);
+      }
+    }
+    function toggleMonths(yDiv, year){
+      let next = yDiv.nextElementSibling;
+      if(next && next.classList.contains("month-container")){ next.remove(); return; }
+      const mC = document.createElement("div");
+      mC.className = "month-container";
+      months.forEach((m, i)=>{
+        const mDiv = document.createElement("div");
+        mDiv.className = "month-box";
+        mDiv.textContent = `${m} ${year}`;
+        mDiv.addEventListener("click", ()=>toggleDays(mDiv, year, i));
+        mC.appendChild(mDiv);
+      });
+      yDiv.after(mC);
+    }
+    function toggleDays(mDiv, year, month){
+      let next = mDiv.nextElementSibling;
+      if(next && next.classList.contains("days-grid")){ next.remove(); return; }
+      const grid = document.createElement("div");
+      grid.className = "days-grid";
+      const days = new Date(year, month+1, 0).getDate();
+      for(let d=1; d<=days; d++){
+        const b = document.createElement("div");
+        b.className = "day-btn";
+        b.textContent = d;
+        b.addEventListener("click", ()=>openDay(year, month, d));
+        grid.appendChild(b);
+      }
+      mDiv.after(grid);
+    }
+    function openDay(y, m, d){
+      const sel = new Date(y, m, d);
+      localStorage.setItem("meri_selected_date", sel.toISOString());
+      document.getElementById("dateSelectorPage").style.display="none";
+      document.getElementById("mainApp").style.display="block";
+      renderSelectedHeader(sel);
+      window.currentDate = sel;
+      setupDaily();
+    }
+    function renderSelectedHeader(d){
+      document.getElementById("selectedDateHeader").textContent = `${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()}`;
+    }
 
-      const clockEl = document.querySelector('.clock');
-      if (!clockEl.dataset.initialized) {
-        clockEl.innerHTML = `
-          <div id="hoursSeg" class="segment"></div>
-          <div class="colon">:</div>
-          <div id="minsSeg" class="segment"></div>
-          <div class="colon">:</div>
-          <div id="secsSeg" class="segment"></div>
+    // === Logs Table ===
+    async function loadEntries(uid){
+      const d = window.currentDate || new Date();
+      const from = startOfDayUtc(d).toISOString();
+      const to = nextDayUtc(d).toISOString();
+      const { data, error } = await supabase
+        .from("logs")
+        .select("*")
+        .eq("user_id", uid)
+        .gte("start_time", from)
+        .lt("start_time", to)
+        .order("start_time", { ascending:false });
+      if(error){ alert("Load entries error: " + error.message); return; }
+      const tb = document.getElementById("entriesBody");
+      tb.innerHTML = "";
+      (data||[]).forEach(r=>{
+        const s = new Date(r.start_time);
+        const e = r.end_time ? new Date(r.end_time) : null;
+        const dur = e ? formatDuration(e - s) : "";
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${pad(s.getDate())}.${pad(s.getMonth()+1)}.${s.getFullYear()}</td>
+          <td>${s.toLocaleTimeString()}</td>
+          <td>${e? e.toLocaleTimeString() : "-"}</td>
+          <td>${dur}</td>
+          <td>${r.activity||""}</td>
+          <td>${r.tag||""}</td>
+          <td>${r.notes||""}</td>
         `;
-        clockEl.dataset.initialized = "true";
-      }
-
-      renderDigits("hoursSeg", h);
-      renderDigits("minsSeg", m);
-      renderDigits("secsSeg", s);
+        tb.appendChild(tr);
+      });
     }
 
-    function renderDigits(id,str){
-      const seg=document.getElementById(id);
-      if(!seg) return;
-      seg.innerHTML="";
-      for(const ch of str){
-        const e=document.createElement("div");
-        e.className="flip";
-        e.innerHTML=`<div class="card-face"><div class="half top"><div class="digit">${ch}</div></div><div class="half bottom"><div class="digit">${ch}</div></div></div>`;
-        seg.appendChild(e);
+    // === 30-min Checkboxes (per-day) ===
+    function buildCheckboxGrid(){
+      const g = document.getElementById("slotsGrid");
+      g.innerHTML = "";
+      // Label meaning: 30-min block confirmed "No social + hands off hair"
+      for(let i=0;i<48;i++){
+        const H = Math.floor(i/2);
+        const M = i%2===0 ? 0 : 30;
+        const label = `${pad(H)}:${pad(M)}`;
+        const div = document.createElement("div");
+        div.className = "slot";
+        div.innerHTML = `
+          <span>${label}</span>
+          <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
+            <input type="checkbox" data-label="${label}" />
+            <span class="hint">No social + hands off</span>
+          </label>
+        `;
+        g.appendChild(div);
       }
+      g.addEventListener("change", toggleCheck);
+    }
+    async function loadChecks(){
+      const user = await getCurrentUser(); if(!user) return;
+      const d = window.currentDate || new Date();
+      const from = startOfDayUtc(d).toISOString();
+      const to = nextDayUtc(d).toISOString();
+      const { data, error } = await supabase
+        .from("social_checks")
+        .select("slot_time,checked")
+        .eq("user_id", user.id)
+        .gte("slot_time", from)
+        .lt("slot_time", to);
+      if(error){ alert("Load checks error: " + error.message); return; }
+      const map = new Map();
+      (data||[]).forEach(r=>{
+        const t = new Date(r.slot_time);
+        const key = `${pad(t.getHours())}:${pad(t.getMinutes())}`;
+        map.set(key, !!r.checked);
+      });
+      document.querySelectorAll("#slotsGrid input[type='checkbox']").forEach(cb=>{
+        const l = cb.dataset.label;
+        if(map.has(l)) cb.checked = map.get(l);
+      });
+    }
+    async function toggleCheck(e){
+      const cb = e.target; if(cb.tagName!=="INPUT") return;
+      const user = await getCurrentUser();
+      if(!user){ cb.checked = !cb.checked; alert("Please log in."); return; }
+      const lbl = cb.dataset.label;
+      const d = window.currentDate || new Date();
+      const [H,M] = lbl.split(":").map(Number);
+      const local = new Date(d.getFullYear(), d.getMonth(), d.getDate(), H, M, 0);
+      const slotIso = toIsoLocalAsUtc(local);
+      const { error } = await supabase
+        .from("social_checks")
+        .upsert({ user_id: user.id, slot_time: slotIso, checked: cb.checked }, { onConflict: "user_id,slot_time" });
+      if(error){ alert("Save check error: " + error.message); }
     }
 
-    // (Rest of your code stays unchanged…)
-    // -- Clock in/out, Supabase logic, setupAfterLogin, event listeners --
+    // === Clock In / Out (General) ===
+    function updateClockInTimer(){
+      const startIso = localStorage.getItem("meri_clocked_in");
+      const status = document.getElementById("clockInStatus");
+      if(!startIso){ status.innerHTML = `Not currently clocked in.`; return; }
+      const activity = localStorage.getItem("meri_clocked_in_activity") || "";
+      const elapsed = new Date().getTime() - new Date(startIso).getTime();
+      const dur = formatDuration(elapsed);
+      status.innerHTML = `Clocked In to: <b>${activity}</b> &nbsp;|&nbsp; Duration: <b>${dur}</b>`;
+    }
+    function refreshClockInUi(){
+      const isIn = !!localStorage.getItem("meri_clocked_in");
+      document.getElementById("clockInBtn").disabled = isIn;
+      document.getElementById("clockOutBtn").disabled = !isIn;
+      // bind inputs to localStorage when clocked in
+      const act = document.getElementById("activity");
+      const tag = document.getElementById("category");
+      const notes = document.getElementById("notes");
+      if(isIn){
+        act.value = localStorage.getItem("meri_clocked_in_activity") || "";
+        tag.value = localStorage.getItem("meri_clocked_in_tag") || "";
+        notes.value = localStorage.getItem("meri_clocked_in_notes") || "";
+        act.disabled = tag.disabled = notes.disabled = true;
+      }else{
+        act.disabled = tag.disabled = notes.disabled = false;
+      }
+    }
+    async function handleClockIn(){
+      const user = await getCurrentUser(); if(!user) return alert("Please log in.");
+      const activity = document.getElementById("activity").value.trim();
+      const tag = document.getElementById("category").value;
+      const notes = document.getElementById("notes").value;
+      if(!activity) return alert("Activity is required.");
+      const start_time = new Date().toISOString();
+      const { error } = await supabase.from("logs").insert({ user_id:user.id, start_time, activity, tag, notes, end_time: null });
+      if(error){ alert("Clock In Error: " + error.message); return; }
+      localStorage.setItem("meri_clocked_in", start_time);
+      localStorage.setItem("meri_clocked_in_activity", activity);
+      localStorage.setItem("meri_clocked_in_tag", tag);
+      localStorage.setItem("meri_clocked_in_notes", notes);
+      refreshClockInUi();
+      updateClockInTimer();
+      alert("Clocked In!");
+    }
+    async function handleClockOut(){
+      const user = await getCurrentUser(); if(!user) return alert("Please log in.");
+      const startIso = localStorage.getItem("meri_clocked_in");
+      if(!startIso) return alert("You are not currently clocked in.");
+      const end_time = new Date().toISOString();
+      const activity = localStorage.getItem("meri_clocked_in_activity");
+      const tag = localStorage.getItem("meri_clocked_in_tag");
+      const notes = localStorage.getItem("meri_clocked_in_notes");
+      // Find the exact row by start_time
+      const { data: logs, error: selErr } = await supabase
+        .from("logs")
+        .select("id")
+        .eq("user_id", user.id)
+        .eq("start_time", startIso)
+        .is("end_time", null)
+        .order("start_time", { ascending:false })
+        .limit(1);
+      if(selErr){ alert("Clock Out Error (Select): " + selErr.message); return; }
+      if(!logs || logs.length===0){ alert("Could not find the start log entry."); return; }
+      const { error: updErr } = await supabase
+        .from("logs")
+        .update({ end_time, activity, tag, notes })
+        .eq("id", logs[0].id);
+      if(updErr){ alert("Clock Out Error (Update): " + updErr.message); return; }
+      localStorage.removeItem("meri_clocked_in");
+      localStorage.removeItem("meri_clocked_in_activity");
+      localStorage.removeItem("meri_clocked_in_tag");
+      localStorage.removeItem("meri_clocked_in_notes");
+      refreshClockInUi();
+      updateClockInTimer();
+      await loadEntries(user.id);
+      alert("Clocked Out!");
+    }
+
+    // === Creator Sessions (independent from general clock) ===
+    function updateCreatorMiniTimer(){
+      if(!creatorStart) return;
+      const elapsed = new Date().getTime() - creatorStart.getTime();
+      const totalSeconds = Math.floor(elapsed/1000);
+      const mm = pad(Math.floor(totalSeconds/60));
+      const ss = pad(totalSeconds%60);
+      document.getElementById("miniTimer").textContent = `${mm}:${ss}`;
+    }
+    function startCreator(type){
+      if(creatorTimer) return alert("A creator session is already running. Stop it first.");
+      creatorStart = new Date();
+      localStorage.setItem("meri_creator_session_start", creatorStart.toISOString());
+      localStorage.setItem("meri_creator_session_type", type);
+      document.getElementById("creatorWithBtn").disabled = true;
+      document.getElementById("creatorNoBtn").disabled = true;
+      document.getElementById("creatorStopBtn").disabled = false;
+      document.getElementById("creatorStatus").innerHTML = `Session Active: <b>${type==='social' ? 'With Social' : 'No Social'}</b>`;
+      updateCreatorMiniTimer();
+      creatorTimer = setInterval(updateCreatorMiniTimer, 1000);
+    }
+    async function stopCreator(){
+      if(!creatorTimer && !localStorage.getItem("meri_creator_session_start")) return alert("No active session to stop.");
+      if(creatorTimer){ clearInterval(creatorTimer); creatorTimer=null; }
+      const user = await getCurrentUser();
+      const type = localStorage.getItem("meri_creator_session_type") || "no-social";
+      const startIso = localStorage.getItem("meri_creator_session_start");
+      const endIso = new Date().toISOString();
+      if(user && startIso){
+        const activity = `Creator Session (${type==='social' ? 'With Social' : 'No Social'})`;
+        const tag = "Deep Work";
+        const noteDur = formatDuration(new Date(endIso) - new Date(startIso));
+        await supabase.from("logs").insert({
+          user_id: user.id,
+          start_time: startIso,
+          end_time: endIso,
+          activity,
+          tag,
+          notes: `Duration: ${noteDur}`
+        });
+        await loadEntries(user.id);
+      }
+      localStorage.removeItem("meri_creator_session_start");
+      localStorage.removeItem("meri_creator_session_type");
+      creatorStart = null;
+      document.getElementById("creatorWithBtn").disabled = false;
+      document.getElementById("creatorNoBtn").disabled = false;
+      document.getElementById("creatorStopBtn").disabled = true;
+      document.getElementById("creatorStatus").textContent = "No active session.";
+      document.getElementById("miniTimer").textContent = "00:00";
+    }
+
+    // === Export CSV for selected day ===
+    async function exportCsv(){
+      const user = await getCurrentUser(); if(!user) return alert("Please log in.");
+      const d = window.currentDate || new Date();
+      const from = startOfDayUtc(d).toISOString();
+      const to = nextDayUtc(d).toISOString();
+      const { data, error } = await supabase
+        .from("logs").select("*")
+        .eq("user_id", user.id)
+        .gte("start_time", from)
+        .lt("start_time", to)
+        .order("start_time", { ascending:true });
+      if(error){ alert("Export error: " + error.message); return; }
+      const headers = ["date","start","end","duration","activity","tag","notes"];
+      const rows = (data||[]).map(r=>{
+        const s = new Date(r.start_time);
+        const e = r.end_time ? new Date(r.end_time) : null;
+        const dur = e ? formatDuration(e - s) : "";
+        return [
+          `${pad(s.getDate())}.${pad(s.getMonth()+1)}.${s.getFullYear()}`,
+          s.toLocaleTimeString(),
+          e? e.toLocaleTimeString() : "",
+          dur,
+          (r.activity||"").replaceAll('"','""'),
+          (r.tag||"").replaceAll('"','""'),
+          (r.notes||"").replaceAll('"','""')
+        ];
+      });
+      const csv = [headers, ...rows].map(r => r.map(x=>`"${x}"`).join(",")).join("\n");
+      const blob = new Blob([csv], {type:"text/csv;charset=utf-8"});
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      const fname = `logs_${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}.csv`;
+      a.download = fname;
+      document.body.appendChild(a);
+      a.click();
+      URL.revokeObjectURL(a.href);
+      a.remove();
+    }
+
+    // === Clear Day (both logs + social checks for selected date) ===
+    async function clearDay(){
+      const user = await getCurrentUser(); if(!user) return alert("Please log in.");
+      const d = window.currentDate || new Date();
+      if(!confirm(`Clear all logs and checks for ${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()}?`)) return;
+      const from = startOfDayUtc(d).toISOString();
+      const to = nextDayUtc(d).toISOString();
+      // Delete logs on that day
+      let { error: e1 } = await supabase
+        .from("logs")
+        .delete()
+        .eq("user_id", user.id)
+        .gte("start_time", from)
+        .lt("start_time", to);
+      if(e1){ alert("Clear logs error: " + e1.message); return; }
+      // Delete checks on that day
+      let { error: e2 } = await supabase
+        .from("social_checks")
+        .delete()
+        .eq("user_id", user.id)
+        .gte("slot_time", from)
+        .lt("slot_time", to);
+      if(e2){ alert("Clear checks error: " + e2.message); return; }
+      await loadEntries(user.id);
+      await loadChecks();
+      alert("Day cleared.");
+    }
+
+    // === Main setup ===
+    async function setupDaily(){
+      const user = await getCurrentUser(); if(!user) return;
+      await loadEntries(user.id);
+      buildCheckboxGrid();
+      await loadChecks();
+      refreshClockInUi();
+      updateClockInTimer();
+    }
+
+    async function setupAfterLogin(){
+      const user = await getCurrentUser();
+      if(!user) return;
+      document.getElementById("authSection").style.display = "none";
+
+      // restore selected date or default to today (Nov 1, 2025 is "today" for you — but we use actual today)
+      const saved = localStorage.getItem("meri_selected_date");
+      const d = saved ? new Date(saved) : new Date();
+      window.currentDate = d;
+      renderSelectedHeader(d);
+      document.getElementById("mainApp").style.display = "block";
+
+      // restore creator session if running
+      if(localStorage.getItem("meri_creator_session_start")){
+        creatorStart = new Date(localStorage.getItem("meri_creator_session_start"));
+        const type = localStorage.getItem("meri_creator_session_type") || "no-social";
+        document.getElementById("creatorWithBtn").disabled = true;
+        document.getElementById("creatorNoBtn").disabled = true;
+        document.getElementById("creatorStopBtn").disabled = false;
+        document.getElementById("creatorStatus").innerHTML = `Session Active: <b>${type==='social' ? 'With Social' : 'No Social'}</b>`;
+        updateCreatorMiniTimer();
+        creatorTimer = setInterval(updateCreatorMiniTimer, 1000);
+      }
+
+      await setupDaily();
+    }
+
     window.addEventListener("DOMContentLoaded", async () => {
+      // Sections visibility
       document.getElementById("mainApp").style.display = "none";
       document.getElementById("dateSelectorPage").style.display = "none";
-      const { data: { session } } = await supabase.auth.getSession();
+
+      startClock();
+
+      const { data:{ session } } = await supabase.auth.getSession();
+
+      // Auth
       document.getElementById("authForm").addEventListener("submit", handleAuth);
       document.getElementById("logoutBtn").addEventListener("click", handleLogout);
-      setInterval(tickClock, 1000);
-      if (!session?.user) {
-          document.getElementById("authSection").style.display = "block";
-          return;
+
+      // General Clock In/Out
+      document.getElementById("clockInBtn").addEventListener("click", handleClockIn);
+      document.getElementById("clockOutBtn").addEventListener("click", handleClockOut);
+
+      // Creator Session
+      document.getElementById("creatorWithBtn").addEventListener("click", ()=>startCreator("social"));
+      document.getElementById("creatorNoBtn").addEventListener("click", ()=>startCreator("no-social"));
+      document.getElementById("creatorStopBtn").addEventListener("click", stopCreator);
+
+      // Export & Clear Day
+      document.getElementById("exportBtn").addEventListener("click", exportCsv);
+      document.getElementById("clearBtn").addEventListener("click", clearDay);
+
+      // Date selector
+      document.getElementById("pickDateBtn").addEventListener("click", ()=>{
+        document.getElementById("mainApp").style.display="none";
+        document.getElementById("dateSelectorPage").style.display="block";
+        buildDateSelector();
+      });
+
+      if(!session?.user){
+        document.getElementById("authSection").style.display = "block";
+        return;
       }
       await setupAfterLogin();
     });
   </script>
 </head>
-
 <body>
   <div class="container">
-    <div id="authSection" class="card">
-      <div class="section-title">Log in or Sign up</div>
-      <form id="authForm" class="form">
-        <input type="email" id="authEmail" placeholder="Email" required />
-        <input type="password" id="authPassword" placeholder="Password" required />
-        <button class="btn primary" type="submit">Continue</button>
-      </form>
+    <div class="row" style="max-width:1100px">
+      <div class="card" style="display:flex;align-items:center;justify-content:space-between;gap:12px">
+        <div class="brand">
+          <span class="badge">Meri</span>
+          Daily Tracker
+        </div>
+        <div class="clock-wrap">
+          <div class="date-line" id="dateText">—</div>
+          <div class="clock" id="clockText">00:00:00</div>
+        </div>
+      </div>
     </div>
 
-    <div id="mainApp" style="display:none">
-      <div class="card">
-        <div class="section-title">Flip Clock</div>
-        <div class="clock"></div>
+    <!-- Auth -->
+    <div id="authSection" class="row">
+      <div class="card col-12">
+        <div class="section-title"><span class="dot"></span>Log in or Sign up</div>
+        <form id="authForm" class="form">
+          <input type="email" id="authEmail" placeholder="Email" required />
+          <input type="password" id="authPassword" placeholder="Password" required />
+          <button class="btn primary" type="submit">Continue</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Date selector -->
+    <div id="dateSelectorPage" class="row">
+      <div class="card col-12 date-selector">
+        <div class="section-title"><span class="dot"></span>Select Date</div>
+        <div class="controls" style="margin-bottom:8px">
+          <button id="backToMainBtn" class="btn" onclick="document.getElementById('dateSelectorPage').style.display='none';document.getElementById('mainApp').style.display='block';">Back</button>
+        </div>
+        <div id="dateSelector"></div>
+      </div>
+    </div>
+
+    <!-- Main App -->
+    <div id="mainApp" class="row">
+      <div class="card col-12">
+        <div class="controls">
+          <button id="logoutBtn" class="btn">Log out</button>
+          <button id="pickDateBtn" class="btn">Pick another date</button>
+          <div class="spacer"></div>
+          <button id="exportBtn" class="btn primary">Export CSV (Selected Day)</button>
+          <button id="clearBtn" class="btn pink">Clear Day</button>
+        </div>
+        <h2 id="selectedDateHeader" style="text-align:center;margin:12px 0 0 0;"></h2>
+      </div>
+
+      <!-- Clock In/Out -->
+      <div class="card col-12">
+        <div class="section-title"><span class="dot"></span>Clock In / Clock Out</div>
+        <form class="form" onsubmit="return false;">
+          <input type="text" id="activity" placeholder="What are you doing?" required />
+          <select id="category">
+            <option value="">No tag</option>
+            <option>Study</option>
+            <option>Work</option>
+            <option>Gym</option>
+            <option>Deep Work</option>
+            <option>Content</option>
+            <option>Admin</option>
+          </select>
+          <textarea id="notes" placeholder="Notes (optional)"></textarea>
+          <button id="clockInBtn" class="btn success" type="button">Clock In</button>
+          <button id="clockOutBtn" class="btn warn" type="button" disabled>Clock Out</button>
+        </form>
+        <div id="clockInStatus" class="status-chip" style="margin-top:10px;">
+          <span class="pill"></span>
+          <span>Not currently clocked in.</span>
+        </div>
+      </div>
+
+      <!-- Entries -->
+      <div class="card col-12">
+        <div class="section-title"><span class="dot"></span>Entries</div>
+        <table>
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Start</th>
+              <th>End</th>
+              <th>Duration</th>
+              <th>Activity</th>
+              <th>Tag</th>
+              <th>Notes</th>
+            </tr>
+          </thead>
+          <tbody id="entriesBody"></tbody>
+        </table>
+      </div>
+
+      <!-- Creator Sessions + 30-min Checks -->
+      <div class="card col-12">
+        <div class="section-title"><span class="dot"></span>Focus Zone — Creator Sessions & 30-min Checks</div>
+
+        <div class="form" style="align-items:center;">
+          <button id="creatorWithBtn" class="btn primary" type="button">Start Creator (With Social)</button>
+          <button id="creatorNoBtn" class="btn success" type="button">Start Creator (No Social)</button>
+          <button id="creatorStopBtn" class="btn warn" type="button" disabled>Stop</button>
+          <span style="margin-left:10px;">Session Timer: <span id="miniTimer" class="mini-timer">00:00</span></span>
+        </div>
+        <div class="hint" id="creatorStatus" style="margin-top:6px;">No active session.</div>
+
+        <div style="margin-top:12px;font-weight:700">30-min Discipline Checks</div>
+        <div class="hint">Tick when a block was clean: <b>No social + hands off hair</b>. Saved per selected day.</div>
+        <div id="slotsGrid" class="slots-grid"></div>
       </div>
     </div>
   </div>
