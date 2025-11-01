@@ -190,15 +190,34 @@
       else{document.getElementById("dateSelectorPage").style.display="block";buildDateSelector();}
     }
 
-    window.addEventListener("DOMContentLoaded",async()=>{
-      document.getElementById("mainApp").style.display="none";
-      document.getElementById("dateSelectorPage").style.display="none";
-      const {data:{session}}=await supabase.auth.getSession();
-      if(session?.user)setupAfterLogin();
-      document.getElementById("authForm").addEventListener("submit",handleAuth);
-      document.getElementById("logoutBtn").addEventListener("click",handleLogout);
-      setInterval(tickClock,1000);
-    });
+ window.addEventListener("DOMContentLoaded", async () => {
+  document.getElementById("mainApp").style.display = "none";
+  document.getElementById("dateSelectorPage").style.display = "none";
+
+  const { data: { session } } = await supabase.auth.getSession();
+
+  document.getElementById("authForm").addEventListener("submit", handleAuth);
+  document.getElementById("logoutBtn").addEventListener("click", handleLogout);
+  setInterval(tickClock, 1000);
+
+  if (!session?.user) return;
+
+  const saved = localStorage.getItem("meri_selected_date");
+  if (saved) {
+    // ✅ Automatically open the previously selected date (stay on same page)
+    const d = new Date(saved);
+    window.currentDate = d;
+    document.getElementById("selectedDateHeader").textContent =
+      `${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()}`;
+    document.getElementById("mainApp").style.display = "block";
+    await setupDaily();
+  } else {
+    // Only show date selector if no date saved
+    document.getElementById("dateSelectorPage").style.display = "block";
+    buildDateSelector();
+  }
+});
+
   </script>
 </head>
 <body>
