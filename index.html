@@ -7,52 +7,50 @@
   <style>
     :root{ --bg:#0b0c10; --panel:#13161b; --card:#14161a; --text:#e8ecf1; --accent:#7aa7ff; --muted:#9aa3b2; --good:#3dcc7b; --warn:#ffc24d; --danger:#ff6b6b; --shadow:rgba(0,0,0,.4); }
     html,body{height:100%;margin:0;background:var(--bg);color:var(--text);font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;}
-    .container{ min-height:100%; display:flex; flex-direction:column; align-items:center; padding:24px 20px 80px; }
-
-    .card{ background:var(--card); border:1px solid rgba(255,255,255,.06); border-radius:14px; box-shadow:0 16px 40px var(--shadow); padding:18px; max-width:1100px; width:100%; }
-
-    .section-title{ font-weight:700; letter-spacing:.04em; text-transform:uppercase; font-size:12px; color:var(--muted); margin:0 0 12px; }
-    .controls{ display:flex; gap:12px; flex-wrap:wrap; align-items:center; justify-content:center; }
-    .btn{ background:var(--card); color:var(--text); border:1px solid rgba(255,255,255,.06); border-radius:10px; padding:10px 14px; box-shadow:0 8px 24px var(--shadow); cursor:pointer; user-select:none; }
-    .btn.primary{ background:linear-gradient(180deg, var(--accent), #436cff); color:white; border-color:transparent; }
-    .btn.success{ background:linear-gradient(180deg, var(--good), #1b8b52); color:white; border-color:transparent; }
-    .btn.warn{ background:linear-gradient(180deg, var(--warn), #a37400); color:white; border-color:transparent; }
-    .btn.ghost{ background:transparent; border:1px dashed rgba(255,255,255,.18); }
-
-    .date-selector{ display:flex; flex-direction:column; gap:12px; align-items:center; }
-    .year-box, .month-box{ background:var(--panel); border-radius:10px; padding:10px 16px; width:100%; max-width:400px; cursor:pointer; }
-    .days-grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(80px,1fr)); gap:8px; width:100%; max-width:400px; margin-top:6px; }
-    .day-btn{ background:var(--card); border:1px solid rgba(255,255,255,.08); border-radius:8px; padding:8px; text-align:center; cursor:pointer; transition:.2s; }
-    .day-btn:hover{ background:var(--accent); color:white; }
-
-    .clock{ display:flex; gap:16px; align-items:center; justify-content:center; flex-wrap:wrap; }
-    .segment{ display:flex; gap:8px; }
-    .colon{ font-weight:800; font-size:48px; opacity:.75; position:relative; top:-8px; }
-    .flip{ position:relative; width:92px; height:120px; perspective:1000px; }
-    .card-face{ position:relative; width:100%; height:100%; border-radius:14px; background:linear-gradient(180deg, var(--card), #0f1116); border:1px solid rgba(255,255,255,.06); overflow:hidden; }
-    .half{ position:absolute; left:0; right:0; height:50%; display:flex; align-items:center; justify-content:center; font-weight:800; font-variant-numeric:tabular-nums; }
-    .top{ top:0; border-bottom:1px solid rgba(0,0,0,.35); }
-    .bottom{ bottom:0; }
-    .digit{ font-size:68px; }
-
-    table{ width:100%; border-collapse:separate; border-spacing:0; }
-    th, td{ padding:10px 12px; text-align:left; border-bottom:1px solid rgba(255,255,255,.08); }
-    thead th{ font-size:12px; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); }
-    .right{ text-align:right; }
-
-    .slot{ background:var(--panel); border:1px solid rgba(255,255,255,.08); border-radius:10px; padding:10px 12px; display:flex; align-items:center; justify-content:space-between; gap:8px; }
+    .container{min-height:100%;display:flex;flex-direction:column;align-items:center;padding:24px 20px 80px;}
+    .card{background:var(--card);border:1px solid rgba(255,255,255,.06);border-radius:14px;box-shadow:0 16px 40px var(--shadow);padding:18px;max-width:1100px;width:100%;}
+    .section-title{font-weight:700;letter-spacing:.04em;text-transform:uppercase;font-size:12px;color:var(--muted);margin:0 0 12px;}
+    .controls{display:flex;gap:12px;flex-wrap:wrap;align-items:center;justify-content:center;}
+    .btn{background:var(--card);color:var(--text);border:1px solid rgba(255,255,255,.06);border-radius:10px;padding:10px 14px;box-shadow:0 8px 24px var(--shadow);cursor:pointer;user-select:none;}
+    .btn.primary{background:linear-gradient(180deg, var(--accent), #436cff);color:white;border-color:transparent;}
+    .btn.success{background:linear-gradient(180deg, var(--good), #1b8b52);color:white;border-color:transparent;}
+    .btn.warn{background:linear-gradient(180deg, var(--warn), #a37400);color:white;border-color:transparent;}
+    .btn.ghost{background:transparent;border:1px dashed rgba(255,255,255,.18);}
+    .date-selector{display:flex;flex-direction:column;gap:12px;align-items:center;}
+    .year-box,.month-box{background:var(--panel);border-radius:10px;padding:10px 16px;width:100%;max-width:400px;cursor:pointer;}
+    .days-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(80px,1fr));gap:8px;width:100%;max-width:400px;margin-top:6px;}
+    .day-btn{background:var(--card);border:1px solid rgba(255,255,255,.08);border-radius:8px;padding:8px;text-align:center;cursor:pointer;transition:.2s;}
+    .day-btn:hover{background:var(--accent);color:white;}
+    .clock{display:flex;gap:16px;align-items:center;justify-content:center;flex-wrap:wrap;}
+    .segment{display:flex;gap:8px;}
+    .colon{font-weight:800;font-size:48px;opacity:.75;position:relative;top:-8px;}
+    .flip{position:relative;width:92px;height:120px;perspective:1000px;}
+    .card-face{position:relative;width:100%;height:100%;border-radius:14px;background:linear-gradient(180deg, var(--card), #0f1116);border:1px solid rgba(255,255,255,.06);overflow:hidden;}
+    .half{position:absolute;left:0;right:0;height:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-variant-numeric:tabular-nums;}
+    .top{top:0;border-bottom:1px solid rgba(0,0,0,.35);}
+    .bottom{bottom:0;}
+    .digit{font-size:68px;}
+    table{width:100%;border-collapse:separate;border-spacing:0;}
+    th,td{padding:10px 12px;text-align:left;border-bottom:1px solid rgba(255,255,255,.08);}
+    thead th{font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);}
+    .right{text-align:right;}
+    .slot{background:var(--panel);border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:10px 12px;display:flex;align-items:center;justify-content:space-between;gap:8px;}
+    .form{display:flex;gap:10px;flex-wrap:wrap;align-items:center;}
+    .form input,.form select,.form textarea{background:var(--panel);color:var(--text);border:1px solid rgba(255,255,255,.06);border-radius:10px;padding:10px 12px;outline:none;}
+    .mini-timer{font-weight:800;font-variant-numeric:tabular-nums;}
   </style>
 
   <script type="module">
     import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-    const SUPABASE_URL = "https://eqqunclfxzmfosjwzwki.supabase.co";
-    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVxcXVuY2xmeHptZm9zand6d2tpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjE5NDg1MDQsImV4cCI6MjA3NzUyNDUwNH0.1N5pYTxFf6PjCMgQ0nUICsc9jLL58LuDZgX_s8yLe_w";
-    const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    const SUPABASE_URL="https://eqqunclfxzmfosjwzwki.supabase.co";
+    const SUPABASE_ANON_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVxcXVuY2xmeHptZm9zand6d2tpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjE5NDg1MDQsImV4cCI6MjA3NzUyNDUwNH0.1N5pYTxFf6PjCMgQ0nUICsc9jLL58LuDZgX_s8yLe_w";
+    const supabase=createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
 
     const pad=n=>n.toString().padStart(2,"0");
-    const fmtDate=d=>`${pad(d.getDate())}.${pad(d.getMonth()+1)}.${d.getFullYear()}`;
-    function startOfDayUtc(d){ const x=new Date(d.getFullYear(),d.getMonth(),d.getDate(),0,0,0); return new Date(x.getTime()-x.getTimezoneOffset()*60000);}
-    function nextDayUtc(d){ const x=new Date(d.getFullYear(),d.getMonth(),d.getDate()+1,0,0,0); return new Date(x.getTime()-x.getTimezoneOffset()*60000);}
+    const months=["January","February","March","April","May","June","July","August","September","October","November","December"];
+
+    function startOfDayUtc(d){const x=new Date(d.getFullYear(),d.getMonth(),d.getDate(),0,0,0);return new Date(x.getTime()-x.getTimezoneOffset()*60000);}
+    function nextDayUtc(d){const x=new Date(d.getFullYear(),d.getMonth(),d.getDate()+1,0,0,0);return new Date(x.getTime()-x.getTimezoneOffset()*60000);}
     async function getCurrentUser(){const {data:{user}}=await supabase.auth.getUser();return user;}
 
     async function handleAuth(e){
@@ -60,131 +58,136 @@
       const email=document.getElementById("authEmail").value;
       const password=document.getElementById("authPassword").value;
       let {error}=await supabase.auth.signInWithPassword({email,password});
-      if(error){const {error:e2}=await supabase.auth.signUp({email,password});
-      if(e2)return alert("Auth error: "+e2.message);alert("Signup successful!");}
-      else alert("Login successful!");
+      if(error){
+        const {error:e2}=await supabase.auth.signUp({email,password});
+        if(e2)return alert("Auth error: "+e2.message);
+        alert("Signup successful!");
+      } else alert("Login successful!");
       setupAfterLogin();
     }
 
-    async function handleLogout(){await supabase.auth.signOut();location.reload();}
+    async function handleLogout(){await supabase.auth.signOut();localStorage.removeItem("meri_selected_date");location.reload();}
 
-    // Date selector build
-    const months=["January","February","March","April","May","June","July","August","September","October","November","December"];
     function buildDateSelector(){
-      const container=document.getElementById("dateSelector");
-      container.innerHTML="";
+      const c=document.getElementById("dateSelector");
+      c.innerHTML="";
       for(let y=2025;y<=2030;y++){
         const yDiv=document.createElement("div");
         yDiv.className="year-box";
         yDiv.textContent=y;
         yDiv.addEventListener("click",()=>toggleMonths(yDiv,y));
-        container.appendChild(yDiv);
+        c.appendChild(yDiv);
       }
     }
-
     function toggleMonths(yDiv,year){
       let existing=yDiv.nextElementSibling;
       if(existing&&existing.classList.contains("month-container")){existing.remove();return;}
-      const monthsDiv=document.createElement("div");
-      monthsDiv.className="month-container";
+      const mC=document.createElement("div");
+      mC.className="month-container";
       months.forEach((m,i)=>{
         const mDiv=document.createElement("div");
         mDiv.className="month-box";
         mDiv.textContent=m;
         mDiv.addEventListener("click",()=>toggleDays(mDiv,year,i));
-        monthsDiv.appendChild(mDiv);
+        mC.appendChild(mDiv);
       });
-      yDiv.after(monthsDiv);
+      yDiv.after(mC);
     }
-
-    function toggleDays(mDiv,year,monthIndex){
+    function toggleDays(mDiv,year,month){
       let existing=mDiv.nextElementSibling;
       if(existing&&existing.classList.contains("days-grid")){existing.remove();return;}
       const grid=document.createElement("div");
       grid.className="days-grid";
-      const daysInMonth=new Date(year,monthIndex+1,0).getDate();
-      for(let d=1;d<=daysInMonth;d++){
-        const btn=document.createElement("div");
-        btn.className="day-btn";
-        btn.textContent=d;
-        btn.addEventListener("click",()=>openDailyPage(year,monthIndex,d));
-        grid.appendChild(btn);
+      const days=new Date(year,month+1,0).getDate();
+      for(let d=1;d<=days;d++){
+        const b=document.createElement("div");
+        b.className="day-btn";
+        b.textContent=d;
+        b.addEventListener("click",()=>openDay(year,month,d));
+        grid.appendChild(b);
       }
       mDiv.after(grid);
     }
 
-    function openDailyPage(year,month,day){
+    function openDay(y,m,d){
+      const sel=new Date(y,m,d);
+      localStorage.setItem("meri_selected_date",sel.toISOString());
       document.getElementById("dateSelectorPage").style.display="none";
       document.getElementById("mainApp").style.display="block";
-      document.getElementById("selectedDateHeader").textContent=`${day} ${months[month]} ${year}`;
-      window.currentDate=new Date(year,month,day);
-      setupDailyData();
+      document.getElementById("selectedDateHeader").textContent=`${d} ${months[m]} ${y}`;
+      window.currentDate=sel;
+      setupDaily();
     }
 
-    async function setupDailyData(){
+    async function setupDaily(){
       const user=await getCurrentUser(); if(!user)return;
-      await loadEntriesFromDB(user.id);
-      buildCheckboxGrid(); await loadChecksForToday();
+      await loadEntries(user.id);
+      buildCheckboxGrid(); await loadChecks();
     }
 
-    async function loadEntriesFromDB(userId){
+    async function loadEntries(uid){
       const d=window.currentDate||new Date();
-      const from=startOfDayUtc(d).toISOString(); const to=nextDayUtc(d).toISOString();
-      const {data,error}=await supabase.from("logs").select("*").eq("user_id",userId).gte("start_time",from).lt("start_time",to).order("start_time",{ascending:false});
-      if(error)return console.error(error);
-      const tb=document.getElementById("entriesBody"); tb.innerHTML="";
-      data.forEach(r=>{
-        const start=new Date(r.start_time); const end=r.end_time?new Date(r.end_time):null;
+      const from=startOfDayUtc(d).toISOString();const to=nextDayUtc(d).toISOString();
+      const {data}=await supabase.from("logs").select("*").eq("user_id",uid).gte("start_time",from).lt("start_time",to).order("start_time",{ascending:false});
+      const tb=document.getElementById("entriesBody");tb.innerHTML="";
+      data?.forEach(r=>{
+        const s=new Date(r.start_time);const e=r.end_time?new Date(r.end_time):null;
         const tr=document.createElement("tr");
-        tr.innerHTML=`<td>${fmtDate(start)}</td><td>${start.toLocaleTimeString()}</td><td>${end?end.toLocaleTimeString():"-"}</td><td>${r.activity||""}</td><td>${r.tag||""}</td><td>${r.notes||""}</td>`;
+        tr.innerHTML=`<td>${pad(s.getDate())}.${pad(s.getMonth()+1)}.${s.getFullYear()}</td><td>${s.toLocaleTimeString()}</td><td>${e?e.toLocaleTimeString():"-"}</td><td>${r.activity||""}</td><td>${r.tag||""}</td><td>${r.notes||""}</td>`;
         tb.appendChild(tr);
       });
     }
 
     function buildCheckboxGrid(){
-      const g=document.getElementById("slotsGrid"); g.innerHTML="";
+      const g=document.getElementById("slotsGrid");g.innerHTML="";
       for(let i=0;i<48;i++){
-        const label=`${pad(Math.floor(i/2))}:${i%2===0?"00":"30"}`;
+        const lbl=`${pad(Math.floor(i/2))}:${i%2===0?"00":"30"}`;
         const div=document.createElement("div");div.className="slot";
-        div.innerHTML=`<span>${label}</span><input type="checkbox" data-label="${label}">`;
+        div.innerHTML=`<span>${lbl}</span><input type="checkbox" data-label="${lbl}">`;
         g.appendChild(div);
       }
-      g.addEventListener("change",handleCheckToggle);
+      g.addEventListener("change",toggleCheck);
     }
 
-    async function loadChecksForToday(){
-      const user=await getCurrentUser(); if(!user)return;
+    async function loadChecks(){
+      const user=await getCurrentUser();if(!user)return;
       const d=window.currentDate||new Date();
-      const from=startOfDayUtc(d).toISOString(); const to=nextDayUtc(d).toISOString();
-      const {data,error}=await supabase.from("social_checks").select("slot_time,checked").eq("user_id",user.id).gte("slot_time",from).lt("slot_time",to);
-      if(error)return console.error(error);
-      const map=new Map(); data.forEach(r=>{const t=new Date(r.slot_time);map.set(`${pad(t.getHours())}:${pad(t.getMinutes())}`,!!r.checked);});
-      document.querySelectorAll("#slotsGrid input").forEach(cb=>{const lbl=cb.dataset.label;if(map.has(lbl))cb.checked=map.get(lbl);});
+      const from=startOfDayUtc(d).toISOString();const to=nextDayUtc(d).toISOString();
+      const {data}=await supabase.from("social_checks").select("slot_time,checked").eq("user_id",user.id).gte("slot_time",from).lt("slot_time",to);
+      const map=new Map();data?.forEach(r=>{const t=new Date(r.slot_time);map.set(`${pad(t.getHours())}:${pad(t.getMinutes())}`,!!r.checked);});
+      document.querySelectorAll("#slotsGrid input").forEach(cb=>{const l=cb.dataset.label;if(map.has(l))cb.checked=map.get(l);});
     }
 
-    async function handleCheckToggle(e){
-      const cb=e.target; if(cb.tagName!=="INPUT")return;
-      const user=await getCurrentUser(); if(!user){cb.checked=!cb.checked;return alert("Login first");}
-      const label=cb.dataset.label; const d=window.currentDate||new Date();
-      const [H,M]=label.split(":").map(Number); const local=new Date(d.getFullYear(),d.getMonth(),d.getDate(),H,M);
-      const slot_time=new Date(local.getTime()-local.getTimezoneOffset()*60000).toISOString();
-      await supabase.from("social_checks").upsert({user_id:user.id,slot_time,checked:cb.checked},{onConflict:"user_id,slot_time"});
+    async function toggleCheck(e){
+      const cb=e.target;if(cb.tagName!=="INPUT")return;
+      const user=await getCurrentUser();if(!user){cb.checked=!cb.checked;return alert("Login first");}
+      const lbl=cb.dataset.label;const d=window.currentDate||new Date();
+      const [H,M]=lbl.split(":").map(Number);const local=new Date(d.getFullYear(),d.getMonth(),d.getDate(),H,M);
+      const slot=new Date(local.getTime()-local.getTimezoneOffset()*60000).toISOString();
+      await supabase.from("social_checks").upsert({user_id:user.id,slot_time:slot,checked:cb.checked},{onConflict:"user_id,slot_time"});
     }
 
     function tickClock(){
-      const now=new Date(); const h=pad(now.getHours()),m=pad(now.getMinutes()),s=pad(now.getSeconds());
-      renderDigits("hoursSeg",h); renderDigits("minsSeg",m); renderDigits("secsSeg",s);
+      const n=new Date();
+      const h=pad(n.getHours()),m=pad(n.getMinutes()),s=pad(n.getSeconds());
+      renderDigits("hoursSeg",h);renderDigits("minsSeg",m);renderDigits("secsSeg",s);
     }
     function renderDigits(id,str){
-      const seg=document.getElementById(id); seg.innerHTML="";
-      for(const ch of str){const el=document.createElement("div");el.className="flip";el.innerHTML=`<div class="card-face"><div class="half top"><div class="digit">${ch}</div></div><div class="half bottom"><div class="digit">${ch}</div></div></div>`;seg.appendChild(el);}
+      const seg=document.getElementById(id);seg.innerHTML="";
+      for(const ch of str){
+        const e=document.createElement("div");
+        e.className="flip";
+        e.innerHTML=`<div class="card-face"><div class="half top"><div class="digit">${ch}</div></div><div class="half bottom"><div class="digit">${ch}</div></div></div>`;
+        seg.appendChild(e);
+      }
     }
 
     async function setupAfterLogin(){
-      const user=await getCurrentUser(); if(!user)return;
+      const user=await getCurrentUser();if(!user)return;
       document.getElementById("authSection").style.display="none";
-      document.getElementById("dateSelectorPage").style.display="block";
-      buildDateSelector();
+      const saved=localStorage.getItem("meri_selected_date");
+      if(saved){const d=new Date(saved);window.currentDate=d;document.getElementById("selectedDateHeader").textContent=`${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()}`;document.getElementById("mainApp").style.display="block";setupDaily();}
+      else{document.getElementById("dateSelectorPage").style.display="block";buildDateSelector();}
     }
 
     window.addEventListener("DOMContentLoaded",async()=>{
@@ -220,7 +223,7 @@
         <button id="exportBtn" class="btn primary">Export CSV</button>
         <button id="clearBtn" class="btn ghost">Clear All</button>
       </div>
-      <h2 id="selectedDateHeader" style="text-align:center; margin-top:10px;"></h2>
+      <h2 id="selectedDateHeader" style="text-align:center;margin-top:10px;"></h2>
 
       <div class="card">
         <div class="section-title">Flip Clock</div>
@@ -228,11 +231,11 @@
       </div>
 
       <div class="card">
-        <div class="section-title">Clock In / Out</div>
+        <div class="section-title">Clock In / Clock Out</div>
         <form class="form" onsubmit="return false;">
-          <input id="activity" placeholder="What are you doing?" />
-          <select id="category"><option>No tag</option><option>Study</option><option>Work</option><option>Gym</option></select>
-          <textarea id="notes" placeholder="Notes"></textarea>
+          <input type="text" id="activity" placeholder="What are you doing?" required />
+          <select id="category"><option value="">No tag</option><option>Study</option><option>Work</option><option>Gym</option><option>Deep Work</option><option>Content</option><option>Admin</option></select>
+          <textarea id="notes" placeholder="Notes (optional)"></textarea>
           <button id="clockInBtn" class="btn success" type="button">Clock In</button>
           <button id="clockOutBtn" class="btn warn" type="button">Clock Out</button>
         </form>
@@ -244,10 +247,12 @@
       </div>
 
       <div class="card">
-        <div class="section-title">Focus Zone — 30-min Checks</div>
-        <div id="slotsGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:8px;"></div>
-      </div>
-    </div>
-  </div>
-</body>
-</html>
+        <div class="section-title">Focus Zone — Creator Sessions & 30-min Checks</div>
+        <div class="form" style="align-items:center;">
+          <button id="creatorWithBtn" class="btn primary" type="button">Start Creator (With Social)</button>
+          <button id="creatorNoBtn" class="btn success" type="button">Start Creator (No Social)</button>
+          <button id="creatorStopBtn" class="btn warn" type="button" disabled>Stop</button>
+          <span style="margin-left:10px;">Session Timer: <span id="miniTimer" class="mini-timer">00:00</span></span>
+        </div>
+        <div class="status" id="creatorStatus" style="margin-top:6px;">No active session.</div>
+        <div id="slotsGrid" style="display:grid;grid-template-columns
