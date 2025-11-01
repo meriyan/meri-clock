@@ -3,53 +3,56 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Meri — Flip Clock + Time Logger</title>
+  <title>Meri — Productivity & Creator Zone</title>
 
   <style>
     :root {
-      --bg:#0b0c10; --panel:#13161b; --card:#14161a; --text:#e8ecf1; --accent:#7aa7ff; 
-      --muted:#9aa3b2; --good:#3dcc7b; --warn:#ffc24d; --danger:#ff6b6b; --shadow:rgba(0,0,0,.4);
+      --bg:#0b0c10; --panel:#13161b; --card:#14161a; --text:#e8ecf1;
+      --accent:#7aa7ff; --muted:#9aa3b2; --good:#3dcc7b; --warn:#ffc24d;
+      --danger:#ff6b6b; --shadow:rgba(0,0,0,.4);
     }
-    html,body{height:100%;margin:0;background:var(--bg);color:var(--text);
+    html,body {
+      height:100%; margin:0;
+      background:var(--bg); color:var(--text);
       font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
     }
-    .container{ min-height:100%; display:flex; flex-direction:column; gap:18px; align-items:center; padding:24px 20px 80px; }
-    .grid{ width:100%; max-width:1100px; display:grid; grid-template-columns:1.1fr .9fr; gap:18px; }
+    .container { min-height:100%; display:flex; flex-direction:column; gap:18px; align-items:center; padding:24px 20px 80px; }
+    .grid { width:100%; max-width:1100px; display:grid; grid-template-columns:1.1fr .9fr; gap:18px; }
     @media (max-width:940px){ .grid{ grid-template-columns:1fr; } }
 
-    .controls{ display:flex; gap:12px; flex-wrap:wrap; align-items:center; justify-content:center; }
-    .btn{ background:var(--card); color:var(--text); border:1px solid rgba(255,255,255,.06);
-      border-radius:10px; padding:10px 14px; box-shadow:0 8px 24px var(--shadow); cursor:pointer;
-    }
-    .btn.primary{ background:linear-gradient(180deg, var(--accent), #436cff); color:white; border:none; }
-    .btn.success{ background:linear-gradient(180deg, var(--good), #1b8b52); color:white; border:none; }
-    .btn.warn{ background:linear-gradient(180deg, var(--warn), #a37400); color:white; border:none; }
+    .controls { display:flex; gap:12px; flex-wrap:wrap; align-items:center; justify-content:center; }
+    .btn { background:var(--card); color:var(--text); border:1px solid rgba(255,255,255,.06); border-radius:10px; padding:10px 14px; box-shadow:0 8px 24px var(--shadow); cursor:pointer; user-select:none; }
+    .btn.primary{ background:linear-gradient(180deg, var(--accent), #436cff); color:white; border-color:transparent; }
+    .btn.success{ background:linear-gradient(180deg, var(--good), #1b8b52); color:white; border-color:transparent; }
+    .btn.warn{ background:linear-gradient(180deg, var(--warn), #a37400); color:white; border-color:transparent; }
     .btn.ghost{ background:transparent; border:1px dashed rgba(255,255,255,.18); }
     .btn:disabled{ opacity:.6; cursor:not-allowed; }
 
-    .card{ background:var(--card); border:1px solid rgba(255,255,255,.06);
-      border-radius:14px; box-shadow:0 16px 40px var(--shadow); padding:18px;
-    }
+    .card{ background:var(--card); border:1px solid rgba(255,255,255,.06); border-radius:14px; box-shadow:0 16px 40px var(--shadow); padding:18px; width:100%; max-width:1100px; }
     .section-title{ font-weight:700; letter-spacing:.04em; text-transform:uppercase; font-size:12px; color:var(--muted); margin:0 0 12px; }
-    .clock{ display:flex; gap:16px; align-items:center; justify-content:center; flex-wrap:wrap; font-size:64px; font-weight:700; }
+    .date-line{ text-align:center; color:var(--muted); margin-top:4px; }
 
-    .form{ display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
-    .form input, .form textarea, .form select{
-      background:var(--panel); color:var(--text); border:1px solid rgba(255,255,255,.06);
-      border-radius:10px; padding:10px 12px; outline:none;
-    }
+    .clock{ display:flex; gap:16px; align-items:center; justify-content:center; flex-wrap:wrap; font-size:64px; font-weight:700; }
 
     table{ width:100%; border-collapse:collapse; }
     th, td{ padding:10px 12px; text-align:left; border-bottom:1px solid rgba(255,255,255,.08); }
     thead th{ font-size:12px; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); }
 
+    .slot {
+      background:var(--panel); border:1px solid rgba(255,255,255,.08);
+      border-radius:10px; padding:10px 12px;
+      display:flex; align-items:center; justify-content:space-between; gap:8px;
+    }
+
     .footer{ position:fixed; bottom:10px; left:0; right:0; display:flex; justify-content:center; color:var(--muted); font-size:12px; }
     .footer strong{ color:var(--text); }
   </style>
 </head>
+
 <body>
   <div class="container">
-    <!-- LOGIN -->
+
+    <!-- AUTH SECTION -->
     <div id="authSection" class="card">
       <div class="section-title">Log in or Sign up</div>
       <form id="authForm">
@@ -68,32 +71,61 @@
       <div class="grid">
         <div class="card">
           <div class="section-title">Flip Clock</div>
-          <div id="clockDisplay" class="clock">--:--:--</div>
+          <div id="clockDisplay" class="clock"></div>
         </div>
 
         <div class="card">
           <div class="section-title">Clock In / Clock Out</div>
-          <form class="form" id="logForm" onsubmit="return false;">
+          <div class="form">
             <input type="text" id="activity" placeholder="What are you doing?" required />
             <select id="category">
               <option value="">No tag</option>
-              <option>Study</option><option>Work</option><option>Gym</option>
-              <option>Deep Work</option><option>Content</option><option>Admin</option>
+              <option>Study</option>
+              <option>Work</option>
+              <option>Gym</option>
+              <option>Deep Work</option>
+              <option>Content</option>
+              <option>Admin</option>
             </select>
             <textarea id="notes" placeholder="Notes (optional)"></textarea>
             <button id="clockInBtn" class="btn success" type="button">Clock In</button>
             <button id="clockOutBtn" class="btn warn" type="button" disabled>Clock Out</button>
-          </form>
+          </div>
         </div>
       </div>
 
-      <div class="card" style="width:100%; max-width:1100px;">
+      <div class="card">
         <div class="section-title">Entries</div>
-        <table>
-          <thead><tr><th>Date</th><th>Start</th><th>End</th><th>Activity</th><th>Tag</th><th>Notes</th></tr></thead>
+        <table id="entriesTable">
+          <thead>
+            <tr><th>Date</th><th>Start</th><th>End</th><th>Activity</th><th>Tag</th><th>Notes</th></tr>
+          </thead>
           <tbody id="entriesBody"></tbody>
         </table>
       </div>
+
+      <!-- SOCIAL MEDIA TRACKER -->
+      <div class="card" id="socialTracker">
+        <div class="section-title">Social Media Tracker (30-min Check-ins)</div>
+        <p style="color:var(--muted)">✅ Check a box every 30 minutes you stay off social media.</p>
+        <div id="slotsGrid" style="display:grid; grid-template-columns:repeat(auto-fill,minmax(140px,1fr)); gap:8px;"></div>
+        <div class="date-line" id="smSummary">—</div>
+      </div>
+
+      <!-- CREATOR ZONE -->
+      <div class="card" id="creatorZone">
+        <div class="section-title">Creator Zone 🎨</div>
+        <p style="color:var(--muted)">Choose your creative mode and track your focused time.</p>
+
+        <div class="controls">
+          <button id="startWithSM" class="btn primary">🎬 Start — With Social Media</button>
+          <button id="startWithoutSM" class="btn success">🎥 Start — Without Social Media</button>
+          <button id="stopCreator" class="btn warn" disabled>⏹ Stop</button>
+        </div>
+
+        <div id="creatorStatus" class="date-line">No active creator session</div>
+      </div>
+
     </div>
 
     <div class="footer">Made for <strong>Meri</strong></div>
@@ -101,94 +133,121 @@
 
   <script type="module">
     import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-
     const SUPABASE_URL = "https://eqqunclfxzmfosjwzwki.supabase.co";
     const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVxcXVuY2xmeHptZm9zand6d2tpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjE5NDg1MDQsImV4cCI6MjA3NzUyNDUwNH0.1N5pYTxFf6PjCMgQ0nUICsc9jLL58LuDZgX_s8yLe_w";
     const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-    function fmtDate(t){return new Date(t).toLocaleDateString();}
-    function fmtTime(t){return new Date(t).toLocaleTimeString();}
-    function escapeHtml(s=""){return s.replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
-
-    function updateClockButtons(running){
-      document.getElementById("clockInBtn").disabled = running;
-      document.getElementById("clockOutBtn").disabled = !running;
-    }
-
-    async function getCurrentUser(){
-      const { data:{ user } } = await supabase.auth.getUser();
+    // --- AUTH ---
+    async function getCurrentUser() {
+      const { data: { user } } = await supabase.auth.getUser();
       return user;
     }
-
-    async function setupAfterLogin(){
-      const user = await getCurrentUser();
-      if(!user) return;
-      document.getElementById("authSection").style.display = "none";
-      document.getElementById("mainApp").style.display = "block";
-      loadEntriesFromDB(user.id);
-    }
-
-    async function handleAuth(e){
-      e.preventDefault();
-      const email=document.getElementById("authEmail").value;
-      const password=document.getElementById("authPassword").value;
-      let {error}=await supabase.auth.signInWithPassword({email,password});
-      if(error){
-        const {error:signUpError}=await supabase.auth.signUp({email,password});
-        if(signUpError) return alert(signUpError.message);
-        alert("Signup successful!");
+    async function handleAuth(event) {
+      event.preventDefault();
+      const email = authEmail.value, password = authPassword.value;
+      let { error } = await supabase.auth.signInWithPassword({ email, password });
+      if (error) {
+        const { error: signUpError } = await supabase.auth.signUp({ email, password });
+        if (signUpError) return alert(signUpError.message);
+        alert("Signup successful! Check your email.");
       } else alert("Login successful!");
       setupAfterLogin();
     }
+    async function handleLogout(){ await supabase.auth.signOut(); location.reload(); }
 
-    async function handleLogout(){await supabase.auth.signOut(); window.location.reload();}
+    // --- CLOCK ---
+    function updateClock(){ clockDisplay.textContent = new Date().toLocaleTimeString(); }
+    setInterval(updateClock,1000); updateClock();
 
+    // --- CLOCK IN / OUT ---
     async function clockIn(){
-      const user=await getCurrentUser(); if(!user) return alert("Please log in first.");
-      const activity=document.getElementById("activity").value.trim();
-      const tag=document.getElementById("category").value;
-      const notes=document.getElementById("notes").value.trim();
-      const {error}=await supabase.from("logs").insert([{user_id:user.id,activity,tag,notes,start_time:new Date().toISOString()}]);
+      const user=await getCurrentUser(); if(!user)return alert("Please log in.");
+      const activity=activityEl.value.trim(), tag=category.value, notes=notesEl.value.trim();
+      const { error } = await supabase.from("logs").insert([{user_id:user.id,activity,tag,notes,start_time:new Date().toISOString()}]);
       if(error) return alert(error.message);
-      updateClockButtons(true); loadEntriesFromDB(user.id);
+      alert("✅ Clocked in!"); clockInBtn.disabled=true; clockOutBtn.disabled=false; loadEntries(user.id);
     }
-
     async function clockOut(){
-      const user=await getCurrentUser(); if(!user) return alert("Please log in first.");
-      const activity=document.getElementById("activity").value.trim();
-      const {error}=await supabase.from("logs").update({end_time:new Date().toISOString()})
-        .eq("user_id",user.id).eq("activity",activity).is("end_time",null);
-      if(error) return alert(error.message);
-      updateClockButtons(false); loadEntriesFromDB(user.id);
+      const user=await getCurrentUser(); if(!user)return alert("Please log in.");
+      const { error } = await supabase.from("logs").update({end_time:new Date().toISOString()})
+        .eq("user_id",user.id).eq("activity",activityEl.value.trim()).is("end_time",null);
+      if(error)return alert(error.message);
+      alert("⏹ Clocked out!"); clockInBtn.disabled=false; clockOutBtn.disabled=true; loadEntries(user.id);
     }
-
-    async function loadEntriesFromDB(userId){
-      const {data,error}=await supabase.from("logs").select("*").eq("user_id",userId).order("start_time",{ascending:false});
-      if(error) return console.error(error);
-      const tbody=document.getElementById("entriesBody"); tbody.innerHTML="";
-      data.forEach(r=>{
-        const tr=document.createElement("tr");
-        tr.innerHTML=`<td>${fmtDate(r.start_time)}</td><td>${fmtTime(r.start_time)}</td>
-                      <td>${r.end_time?fmtTime(r.end_time):"—"}</td>
-                      <td>${escapeHtml(r.activity)}</td><td>${escapeHtml(r.tag)}</td><td>${escapeHtml(r.notes)}</td>`;
-        tbody.appendChild(tr);
+    async function loadEntries(uid){
+      const {data,error}=await supabase.from("logs").select("*").eq("user_id",uid).order("start_time",{ascending:false});
+      if(error)return console.error(error);
+      entriesBody.innerHTML=""; data.forEach(r=>{
+        entriesBody.innerHTML+=`<tr>
+          <td>${new Date(r.start_time).toLocaleDateString()}</td>
+          <td>${new Date(r.start_time).toLocaleTimeString()}</td>
+          <td>${r.end_time?new Date(r.end_time).toLocaleTimeString():"—"}</td>
+          <td>${r.activity||""}</td><td>${r.tag||""}</td><td>${r.notes||""}</td></tr>`;
       });
     }
 
-    function startClock(){
-      const el=document.getElementById("clockDisplay");
-      setInterval(()=>{const d=new Date(); el.textContent=d.toLocaleTimeString();},1000);
+    // --- SOCIAL MEDIA TRACKER ---
+    function generateSlots(){
+      slotsGrid.innerHTML=""; const today=new Date().toLocaleDateString();
+      smSummary.textContent=today;
+      for(let i=0;i<48;i++){
+        const time=`${String(Math.floor(i/2)).padStart(2,"0")}:${i%2===0?"00":"30"}`;
+        const div=document.createElement("div");
+        div.className="slot"; div.innerHTML=`<label><input type="checkbox" id="slot-${i}"><span>${time}</span></label>`;
+        slotsGrid.appendChild(div);
+      }
     }
+    function saveSlots(){
+      const checks=[]; document.querySelectorAll("#slotsGrid input").forEach((cb,i)=>cb.checked&&checks.push(i));
+      localStorage.setItem("smSlots_"+new Date().toLocaleDateString(),JSON.stringify(checks)); updateSummary();
+    }
+    function loadSlots(){
+      const today=new Date().toLocaleDateString();
+      const saved=JSON.parse(localStorage.getItem("smSlots_"+today)||"[]");
+      saved.forEach(i=>{const cb=document.getElementById("slot-"+i);if(cb)cb.checked=true;});
+      updateSummary();
+    }
+    function updateSummary(){
+      const total=document.querySelectorAll("#slotsGrid input").length;
+      const checked=document.querySelectorAll("#slotsGrid input:checked").length;
+      smSummary.textContent=`${new Date().toLocaleDateString()} — ${checked}/${total} clean blocks`;
+    }
+    slotsGrid.addEventListener("change",saveSlots); generateSlots(); loadSlots();
 
-    window.addEventListener("DOMContentLoaded",async()=>{
-      startClock();
-      document.getElementById("authForm").addEventListener("submit",handleAuth);
-      document.getElementById("logoutBtn").addEventListener("click",handleLogout);
-      document.getElementById("clockInBtn").addEventListener("click",clockIn);
-      document.getElementById("clockOutBtn").addEventListener("click",clockOut);
-      const {data:{session}}=await supabase.auth.getSession();
-      if(session?.user) setupAfterLogin();
-    });
+    // --- CREATOR ZONE ---
+    let creatorStart=null, creatorMode=null;
+    function startCreator(mode){
+      if(creatorStart) return alert("Already running!");
+      creatorMode=mode; creatorStart=new Date();
+      creatorStatus.textContent=`🟢 Creator Zone Active (${mode}) since ${creatorStart.toLocaleTimeString()}`;
+      startWithSM.disabled=true; startWithoutSM.disabled=true; stopCreator.disabled=false;
+      localStorage.setItem("creatorStart",creatorStart); localStorage.setItem("creatorMode",mode);
+    }
+    function stopCreator(){
+      if(!creatorStart) return;
+      const end=new Date(), diff=Math.round((end-creatorStart)/60000);
+      const mode=creatorMode; alert(`🧭 You spent ${diff} minutes in Creator Zone (${mode})`);
+      creatorStatus.textContent=`Last session: ${diff} min (${mode})`;
+      localStorage.removeItem("creatorStart"); localStorage.removeItem("creatorMode");
+      creatorStart=null; creatorMode=null;
+      startWithSM.disabled=false; startWithoutSM.disabled=false; stopCreator.disabled=true;
+    }
+    startWithSM.onclick=()=>startCreator("With Social Media");
+    startWithoutSM.onclick=()=>startCreator("Without Social Media");
+    stopCreator.onclick=stopCreator;
+
+    // --- INIT ---
+    async function setupAfterLogin(){
+      authSection.style.display="none"; mainApp.style.display="block";
+      const user=await getCurrentUser(); if(user) loadEntries(user.id);
+    }
+    authForm.addEventListener("submit",handleAuth);
+    logoutBtn.addEventListener("click",handleLogout);
+    clockInBtn.addEventListener("click",clockIn);
+    clockOutBtn.addEventListener("click",clockOut);
+
+    const { data:{session} } = await supabase.auth.getSession();
+    if(session?.user) setupAfterLogin();
   </script>
 </body>
 </html>
