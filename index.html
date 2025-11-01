@@ -366,9 +366,15 @@
       document.getElementById("clockInBtn").addEventListener("click", clockIn);
       document.getElementById("clockOutBtn").addEventListener("click", clockOut);
 
-      // creator buttons
-      document.getElementById('creatorWithBtn').addEventListener('click', ()=>startCreatorSession('creator_with_social'));
-      document.getElementById('creatorNoBtn').addEventListener('click',   ()=>startCreatorSession('creator_no_social'));
+      // creator buttons (fixed + log)
+document.getElementById('creatorWithBtn').addEventListener('click', ()=>{
+  console.log("Inserting session with usage_type: with_social");
+  startCreatorSession('with_social');
+});
+document.getElementById('creatorNoBtn').addEventListener('click', ()=>{
+  console.log("Inserting session with usage_type: no_social");
+  startCreatorSession('no_social');
+});
       document.getElementById('creatorStopBtn').addEventListener('click', stopCreatorSession);
 
       // checkboxes
