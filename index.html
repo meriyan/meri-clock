@@ -14,9 +14,7 @@
       margin: 0;
       padding: 0;
     }
-    h1, h2, h3 {
-      color: #ffb6ff;
-    }
+    h1, h2, h3 { color: #ffb6ff; }
     .clock {
       font-size: 48px;
       margin: 20px 0;
@@ -44,9 +42,7 @@
       margin: 5px;
       transition: 0.3s;
     }
-    button:hover {
-      background-color: #ff9ee0;
-    }
+    button:hover { background-color: #ff9ee0; }
     input, select {
       padding: 10px;
       border-radius: 8px;
@@ -65,246 +61,234 @@
       padding: 8px;
       text-align: center;
     }
-    th {
-      background-color: #2b0033;
-      color: #ffb6ff;
-    }
-    td {
-      background-color: #1a001f;
-    }
-    .small-text {
-      font-size: 14px;
-      opacity: 0.8;
-    }
+    th { background-color: #2b0033; color: #ffb6ff; }
+    td { background-color: #1a001f; }
+    .small-text { font-size: 14px; opacity: 0.8; }
   </style>
 </head>
 <body>
-  <h1>💖 Meri’s Motivational Clock 💖</h1>
-  <div class="clock" id="mainClock"></div>
-
-  <div class="section">
-    <h2>Select Date</h2>
-    <input type="date" id="selectedDate" />
+  <!-- LOGIN BOX -->
+  <div id="authBox" class="section" style="max-width:400px;">
+    <h2>Login</h2>
+    <input id="authEmail" type="email" placeholder="Email" style="width:90%;margin:4px;"><br>
+    <input id="authPassword" type="password" placeholder="Password" style="width:90%;margin:4px;"><br>
+    <button id="loginBtn">Login</button>
+    <button id="signupBtn">Sign Up</button>
+    <div id="authMsg" class="small-text"></div>
   </div>
+  <button id="logoutBtn" style="display:none;position:fixed;top:16px;right:16px;">Logout</button>
 
-  <div class="section">
-    <h2>Clock In / Clock Out</h2>
-    <input type="text" id="activityInput" placeholder="What are you doing?" />
-    <select id="tagInput">
-      <option value="">No tag</option>
-      <option value="Study">Study</option>
-      <option value="Work">Work</option>
-      <option value="Fitness">Fitness</option>
-      <option value="Other">Other</option>
-    </select>
-    <input type="text" id="notesInput" placeholder="Notes (optional)" />
-    <button id="clockInBtn">Clock In</button>
-    <button id="clockOutBtn">Clock Out</button>
-    <div id="clockStatus" class="small-text">Not currently clocked in.</div>
-  </div>
+  <!-- APP -->
+  <div id="appContainer" style="display:none;">
+    <h1>💖 Meri’s Motivational Clock 💖</h1>
+    <div class="clock" id="mainClock"></div>
 
-  <div class="section">
-    <h2>Entries</h2>
-    <table>
-      <thead>
-        <tr>
-          <th>Date</th>
-          <th>Start</th>
-          <th>End</th>
-          <th>Duration</th>
-          <th>Activity</th>
-          <th>Tag</th>
-          <th>Notes</th>
-        </tr>
-      </thead>
-      <tbody id="entriesTable"></tbody>
-    </table>
-  </div>
+    <div class="section">
+      <h2>Select Date</h2>
+      <input type="date" id="selectedDate" />
+    </div>
 
-  <div class="section">
-    <h2>Creator Sessions</h2>
-    <button id="startCreatorSocial">Start Creator (With Social)</button>
-    <button id="startCreatorNoSocial">Start Creator (No Social)</button>
-    <button id="stopCreator">Stop</button>
-    <div class="small-text">Session Timer: <span id="creatorTimer">00:00</span></div>
-  </div>
+    <div class="section">
+      <h2>Clock In / Clock Out</h2>
+      <input type="text" id="activityInput" placeholder="What are you doing?" />
+      <select id="tagInput">
+        <option value="">No tag</option>
+        <option value="Study">Study</option>
+        <option value="Work">Work</option>
+        <option value="Fitness">Fitness</option>
+        <option value="Other">Other</option>
+      </select>
+      <input type="text" id="notesInput" placeholder="Notes (optional)" />
+      <button id="clockInBtn">Clock In</button>
+      <button id="clockOutBtn">Clock Out</button>
+      <div id="clockStatus" class="small-text">Not currently clocked in.</div>
+    </div>
 
-  <div class="section">
-    <h2 id="monthTitle"></h2>
-    <table>
-      <tbody id="timeSlotsTable"></tbody>
-    </table>
+    <div class="section">
+      <h2>Entries</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Date</th><th>Start</th><th>End</th><th>Duration</th>
+            <th>Activity</th><th>Tag</th><th>Notes</th>
+          </tr>
+        </thead>
+        <tbody id="entriesTable"></tbody>
+      </table>
+    </div>
+
+    <div class="section">
+      <h2>Creator Sessions</h2>
+      <button id="startCreatorSocial">Start Creator (With Social)</button>
+      <button id="startCreatorNoSocial">Start Creator (No Social)</button>
+      <button id="stopCreator">Stop</button>
+      <div class="small-text">Session Timer: <span id="creatorTimer">00:00</span></div>
+    </div>
+
+    <div class="section">
+      <h2 id="monthTitle"></h2>
+      <table><tbody id="timeSlotsTable"></tbody></table>
+    </div>
   </div>
 
   <script>
-    // ✅ Initialize Supabase
-    const supabaseUrl = "https://YOUR_PROJECT_URL.supabase.co";
-    const supabaseKey = "YOUR_SUPABASE_ANON_KEY";
-    const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
-    const user_id = "meri_default_user"; // static user ID
+  const supabaseUrl = "https://YOUR_PROJECT_URL.supabase.co";
+  const supabaseKey = "YOUR_SUPABASE_ANON_KEY";
+  const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
 
-    // ✅ Persistent Date Selection
-    const dateInput = document.getElementById("selectedDate");
-    const savedDate = localStorage.getItem("selectedDate");
-    if (savedDate) {
-      dateInput.value = savedDate;
-    } else {
-      const today = new Date().toISOString().split("T")[0];
-      dateInput.value = today;
-      localStorage.setItem("selectedDate", today);
-    }
-    dateInput.addEventListener("change", () => {
-      localStorage.setItem("selectedDate", dateInput.value);
+  const authBox = document.getElementById("authBox");
+  const appContainer = document.getElementById("appContainer");
+  const loginBtn = document.getElementById("loginBtn");
+  const signupBtn = document.getElementById("signupBtn");
+  const logoutBtn = document.getElementById("logoutBtn");
+  const authMsg = document.getElementById("authMsg");
+  let currentUser = null;
+
+  async function checkSession(){
+    const { data } = await supabase.auth.getSession();
+    const user = data.session?.user;
+    if(user) showApp(user); else showLogin();
+  }
+
+  function showLogin(msg){
+    authBox.style.display = "";
+    appContainer.style.display = "none";
+    logoutBtn.style.display = "none";
+    authMsg.textContent = msg || "";
+  }
+
+  function showApp(user){
+    currentUser = user;
+    authBox.style.display = "none";
+    appContainer.style.display = "";
+    logoutBtn.style.display = "";
+  }
+
+  loginBtn.onclick = async ()=>{
+    const email=document.getElementById("authEmail").value.trim();
+    const password=document.getElementById("authPassword").value;
+    const {error}=await supabase.auth.signInWithPassword({email,password});
+    if(error) authMsg.textContent=error.message; else checkSession();
+  };
+  signupBtn.onclick = async ()=>{
+    const email=document.getElementById("authEmail").value.trim();
+    const password=document.getElementById("authPassword").value;
+    const {error}=await supabase.auth.signUp({email,password});
+    authMsg.textContent=error?error.message:"Check your email to confirm.";
+  };
+  logoutBtn.onclick = async ()=>{
+    await supabase.auth.signOut();
+    showLogin("Logged out.");
+  };
+  supabase.auth.onAuthStateChange((_event,session)=>{
+    if(session?.user) showApp(session.user); else showLogin();
+  });
+  checkSession();
+
+  /* ===== Clock logic ===== */
+  const dateInput=document.getElementById("selectedDate");
+  const savedDate=localStorage.getItem("selectedDate");
+  if(savedDate) dateInput.value=savedDate;
+  else{
+    const today=new Date().toISOString().split("T")[0];
+    dateInput.value=today; localStorage.setItem("selectedDate",today);
+  }
+  dateInput.addEventListener("change",()=>localStorage.setItem("selectedDate",dateInput.value));
+
+  function updateClock(){document.getElementById("mainClock").textContent=new Date().toLocaleTimeString("en-GB");}
+  setInterval(updateClock,1000);updateClock();
+
+  const monthNames=["January","February","March","April","May","June","July","August","September","October","November","December"];
+  const now=new Date();
+  document.getElementById("monthTitle").textContent=`${monthNames[now.getMonth()]} ${now.getFullYear()}`;
+
+  const table=document.getElementById("timeSlotsTable");
+  for(let h=0;h<24;h++){
+    const row=document.createElement("tr");
+    for(let m=0;m<2;m++){
+      const td=document.createElement("td");
+      const label=`${String(h).padStart(2,"0")}:${m===0?"00":"30"}`;
+      const cb=document.createElement("input");
+      cb.type="checkbox"; cb.dataset.time=label;
+      cb.onchange=()=>saveCheckbox(cb);
+      td.append(label,document.createElement("br"),cb); row.appendChild(td);
+    } table.appendChild(row);
+  }
+
+  async function loadCheckboxes(){
+    if(!currentUser) return;
+    const date=dateInput.value;
+    const {data,error}=await supabase.from("social_checks").select("*").eq("user_id",currentUser.id).eq("check_date",date);
+    if(error)console.error(error);
+    const map={}; (data||[]).forEach(r=>map[r.slot_time]=r.checked);
+    document.querySelectorAll("#timeSlotsTable input").forEach(cb=>cb.checked=!!map[cb.dataset.time]);
+  }
+  async function saveCheckbox(cb){
+    if(!currentUser)return;
+    const date=dateInput.value;
+    await supabase.from("social_checks").upsert({
+      user_id:currentUser.id,check_date:date,slot_time:cb.dataset.time,checked:cb.checked
     });
+  }
 
-    // ✅ Flip Clock
-    function updateClock() {
-      const now = new Date();
-      document.getElementById("mainClock").textContent = now.toLocaleTimeString("en-GB");
-    }
-    setInterval(updateClock, 1000);
-    updateClock();
-
-    // ✅ Month title
-    const monthNames = [
-      "January","February","March","April","May","June","July","August","September","October","November","December"
-    ];
-    const now = new Date();
-    document.getElementById("monthTitle").textContent = `${monthNames[now.getMonth()]} ${now.getFullYear()}`;
-
-    // ✅ Generate half-hour slots
-    const table = document.getElementById("timeSlotsTable");
-    for (let h = 0; h < 24; h++) {
-      const row = document.createElement("tr");
-      for (let m = 0; m < 2; m++) {
-        const td = document.createElement("td");
-        const timeLabel = document.createTextNode(`${String(h).padStart(2, "0")}:${m === 0 ? "00" : "30"}`);
-        const checkbox = document.createElement("input");
-        checkbox.type = "checkbox";
-        checkbox.checked = false;
-        td.appendChild(timeLabel);
-        td.appendChild(document.createElement("br"));
-        td.appendChild(checkbox);
-        row.appendChild(td);
-      }
-      table.appendChild(row);
-    }
-
-    // ✅ Clock In/Out
-    let clockedIn = false;
-    let startTime;
-
-    document.getElementById("clockInBtn").addEventListener("click", () => {
-      if (clockedIn) return alert("Already clocked in!");
-      clockedIn = true;
-      startTime = new Date();
-      document.getElementById("clockStatus").textContent = "Clocked in at " + startTime.toLocaleTimeString("en-GB");
+  let clockedIn=false,startTime;
+  document.getElementById("clockInBtn").onclick=()=>{
+    if(clockedIn)return alert("Already clocked in!");
+    clockedIn=true;startTime=new Date();
+    document.getElementById("clockStatus").textContent="Clocked in at "+startTime.toLocaleTimeString("en-GB");
+  };
+  document.getElementById("clockOutBtn").onclick=async()=>{
+    if(!clockedIn)return alert("Not clocked in!");
+    clockedIn=false;
+    const endTime=new Date();
+    const diff=endTime-startTime;
+    const mins=Math.floor(diff/60000);
+    const dur=`${Math.floor(mins/60)}h ${mins%60}m`;
+    const act=document.getElementById("activityInput").value;
+    const tag=document.getElementById("tagInput").value;
+    const notes=document.getElementById("notesInput").value;
+    const date=dateInput.value;
+    await supabase.from("logs").insert({
+      user_id:currentUser.id,activity:act,tag,notes,
+      start_time:startTime.toISOString(),end_time:endTime.toISOString(),log_date:date
     });
+    const row=`<tr><td>${date}</td><td>${startTime.toLocaleTimeString("en-GB")}</td>
+      <td>${endTime.toLocaleTimeString("en-GB")}</td><td>${dur}</td>
+      <td>${act}</td><td>${tag}</td><td>${notes}</td></tr>`;
+    document.getElementById("entriesTable").insertAdjacentHTML("beforeend",row);
+    document.getElementById("clockStatus").textContent="Not currently clocked in.";
+  };
 
-    document.getElementById("clockOutBtn").addEventListener("click", async () => {
-      if (!clockedIn) return alert("Not clocked in!");
-      clockedIn = false;
-      const endTime = new Date();
-      const durationMs = endTime - startTime;
-      const durationMin = Math.floor(durationMs / 60000);
-      const durationFormatted = `${Math.floor(durationMin / 60)}h ${durationMin % 60}m`;
-
-      const activity = document.getElementById("activityInput").value;
-      const tag = document.getElementById("tagInput").value;
-      const notes = document.getElementById("notesInput").value;
-      const session_date = document.getElementById("selectedDate").value;
-
-      try {
-        const { data, error } = await supabase.from("logs").insert([
-          {
-            user_id,
-            activity,
-            tag,
-            notes,
-            start_time: startTime.toISOString(),
-            end_time: endTime.toISOString(),
-            log_date: session_date,
-          },
-        ]);
-        if (error) console.error("Insert error:", error);
-      } catch (err) {
-        console.error("Network error:", err);
-      }
-
-      const row = `<tr>
-        <td>${session_date}</td>
-        <td>${startTime.toLocaleTimeString("en-GB")}</td>
-        <td>${endTime.toLocaleTimeString("en-GB")}</td>
-        <td>${durationFormatted}</td>
-        <td>${activity}</td>
-        <td>${tag}</td>
-        <td>${notes}</td>
-      </tr>`;
-      document.getElementById("entriesTable").innerHTML += row;
-
-      document.getElementById("clockStatus").textContent = "Not currently clocked in.";
+  let creatorTimerActive=false,creatorStartTime,creatorUsageType,creatorInterval;
+  function startCreatorTimer(){
+    creatorStartTime=new Date();
+    creatorInterval=setInterval(()=>{
+      const diff=Math.floor((new Date()-creatorStartTime)/1000);
+      const m=String(Math.floor(diff/60)).padStart(2,"0");
+      const s=String(diff%60).padStart(2,"0");
+      document.getElementById("creatorTimer").textContent=`${m}:${s}`;
+    },1000);
+  }
+  function stopCreatorTimer(){clearInterval(creatorInterval);document.getElementById("creatorTimer").textContent="00:00";}
+  async function saveCreatorSession(start,end,type){
+    if(!currentUser)return;
+    const date=dateInput.value;
+    await supabase.from("social_sessions").insert({
+      user_id:currentUser.id,start_time:start.toISOString(),
+      end_time:end.toISOString(),usage_type:type,session_date:date
     });
+  }
+  document.getElementById("startCreatorSocial").onclick=()=>{if(creatorTimerActive)return;
+    creatorUsageType="With Social";creatorTimerActive=true;startCreatorTimer();};
+  document.getElementById("startCreatorNoSocial").onclick=()=>{if(creatorTimerActive)return;
+    creatorUsageType="No Social";creatorTimerActive=true;startCreatorTimer();};
+  document.getElementById("stopCreator").onclick=async()=>{
+    if(!creatorTimerActive)return;
+    creatorTimerActive=false;const end=new Date();
+    stopCreatorTimer();await saveCreatorSession(creatorStartTime,end,creatorUsageType);
+  };
 
-    // ✅ Creator Sessions
-    let creatorTimerActive = false;
-    let creatorStartTime;
-    let creatorUsageType;
-    let creatorInterval;
-
-    function startCreatorTimer() {
-      creatorStartTime = new Date();
-      creatorInterval = setInterval(() => {
-        const diff = Math.floor((new Date() - creatorStartTime) / 1000);
-        const min = String(Math.floor(diff / 60)).padStart(2, "0");
-        const sec = String(diff % 60).padStart(2, "0");
-        document.getElementById("creatorTimer").textContent = `${min}:${sec}`;
-      }, 1000);
-    }
-
-    function stopCreatorTimer() {
-      clearInterval(creatorInterval);
-      document.getElementById("creatorTimer").textContent = "00:00";
-    }
-
-    async function saveCreatorSession(startTime, endTime, usageType) {
-      const session_date = document.getElementById("selectedDate").value;
-      try {
-        const { data, error } = await supabase.from("social_sessions").insert([
-          {
-            user_id,
-            start_time: startTime.toISOString(),
-            end_time: endTime.toISOString(),
-            usage_type: usageType,
-            session_date,
-          },
-        ]);
-        if (error) throw error;
-        console.log("Creator session saved:", data);
-      } catch (err) {
-        console.error("Creator session failed:", err);
-        alert("Save creator session failed: " + err);
-      }
-    }
-
-    document.getElementById("startCreatorSocial").addEventListener("click", () => {
-      creatorTimerActive = true;
-      creatorUsageType = "With Social";
-      startCreatorTimer();
-    });
-
-    document.getElementById("startCreatorNoSocial").addEventListener("click", () => {
-      creatorTimerActive = true;
-      creatorUsageType = "No Social";
-      startCreatorTimer();
-    });
-
-    document.getElementById("stopCreator").addEventListener("click", async () => {
-      if (!creatorTimerActive) return;
-      creatorTimerActive = false;
-      const endTime = new Date();
-      stopCreatorTimer();
-      await saveCreatorSession(creatorStartTime, endTime, creatorUsageType);
-    });
+  supabase.auth.onAuthStateChange((_e,s)=>{if(s?.user)loadCheckboxes();});
   </script>
 </body>
 </html>
