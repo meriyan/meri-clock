@@ -237,7 +237,7 @@ async function saveCheckbox(cb) {
         {
           user_id: user.id,
           check_date: date,
-          slot_time: `${slot_time}:00`, // ensures valid timestamp-like string
+          slot_time: new Date(`${date}T${slot_time}:00Z`).toISOString(),  // ensures valid timestamp-like string
           checked: cb.checked
         },
         { onConflict: "user_id,check_date,slot_time" }
