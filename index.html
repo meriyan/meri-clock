@@ -124,6 +124,7 @@
       <button id="stopCreator">Stop</button>
       <div class="small-text">Session Timer: <span id="creatorTimer">00:00</span></div>
 
+      <!-- Creator Sessions table: Date · Duration (minutes) · Type -->
       <table>
         <thead>
           <tr>
@@ -153,15 +154,11 @@
   const signupBtn=document.getElementById("signupBtn");
   const logoutBtn=document.getElementById("logoutBtn");
 
-  const keyFor=(base,userId,date)=>`${base}__${userId||"nouser"}__${date}`;
-  const showError=(msg)=>{authMsg.textContent=msg;authMsg.style.color="#ff9ee0";};
-
   async function checkSession(){
     const { data } = await supabase.auth.getSession();
     const user = data.session?.user;
     if(user) showApp(user); else showLogin();
   }
-
   function showLogin(msg){
     authBox.style.display="";appContainer.style.display="none";logoutBtn.style.display="none";
     authMsg.textContent=msg||"";
@@ -172,12 +169,11 @@
     authMsg.textContent="";
     loadDataForDate();
   }
-
   loginBtn.onclick=async()=>{
     const email=document.getElementById("authEmail").value.trim();
     const password=document.getElementById("authPassword").value;
     const {error}=await supabase.auth.signInWithPassword({email,password});
-    if(error)showError("❌ "+error.message);else checkSession();
+    if(error) authMsg.textContent="❌ "+error.message; else checkSession();
   };
   signupBtn.onclick=async()=>{
     const email=document.getElementById("authEmail").value.trim();
@@ -189,17 +185,17 @@
   supabase.auth.onAuthStateChange((_e,s)=>{if(s?.user)showApp(s.user);else showLogin();});
   checkSession();
 
+  // Date, clock, title
   const dateInput=document.getElementById("selectedDate");
   const savedDate=localStorage.getItem("selectedDate");
   if(savedDate)dateInput.value=savedDate;else{const t=new Date().toISOString().split("T")[0];dateInput.value=t;localStorage.setItem("selectedDate",t);}
   dateInput.addEventListener("change",()=>{localStorage.setItem("selectedDate",dateInput.value);loadDataForDate();});
-
   function updateClock(){document.getElementById("mainClock").textContent=new Date().toLocaleTimeString("en-GB");}
   setInterval(updateClock,1000);updateClock();
   const monthNames=["January","February","March","April","May","June","July","August","September","October","November","December"];
   const now=new Date();document.getElementById("monthTitle").textContent=`${monthNames[now.getMonth()]} ${now.getFullYear()}`;
 
-  // time slots
+  // Time slots + checkboxes
   const table=document.getElementById("timeSlotsTable");
   for(let h=0;h<24;h++){
     const row=document.createElement("tr");
@@ -211,7 +207,6 @@
       td.append(label,document.createElement("br"),cb);row.appendChild(td);
     }table.appendChild(row);
   }
-
   async function loadCheckboxes(){
     if(!currentUser)return;
     const date=dateInput.value;
@@ -225,6 +220,7 @@
     await supabase.from("social_checks").upsert({user_id:currentUser.id,check_date:date,slot_time:cb.dataset.time,checked:cb.checked});
   }
 
+  // Clock entries
   async function loadLogs(){
     if(!currentUser)return;
     const date=dateInput.value;
@@ -240,6 +236,7 @@
     });
   }
 
+  // Creator sessions: show ONLY minutes
   async function loadCreatorSessions(){
     if(!currentUser)return;
     const date=dateInput.value;
@@ -261,6 +258,7 @@
     await loadCreatorSessions();
   }
 
+  // Clock in/out
   let clockedIn=false,startTime;
   document.getElementById("clockInBtn").onclick=()=>{
     if(clockedIn)return alert("Already clocked in!");
@@ -280,6 +278,7 @@
     document.getElementById("clockStatus").textContent="Not currently clocked in.";
   };
 
+  // Creator timer + save
   let creatorTimerActive=false,creatorStartTime,creatorUsageType,creatorInterval;
   function startCreatorTimer(){
     creatorStartTime=new Date();
@@ -300,8 +299,17 @@
   document.getElementById("startCreatorNoSocial").onclick=()=>{if(creatorTimerActive)return;creatorUsageType="No Social";creatorTimerActive=true;startCreatorTimer();};
   document.getElementById("stopCreator").onclick=async()=>{
     if(!creatorTimerActive)return;
-    creatorTimerActive=false;const end=new Date();
-    stopCreatorTimer();await saveCreatorSession(creatorStartTime,end,creatorUsageType);
+    creatorTimerActive=false;
+    const end=new Date();
+    // show immediately (minutes only)
+    const minsNow = Math.floor((end - creatorStartTime)/60000);
+    const typeText = creatorUsageType ? `(${creatorUsageType})` : "";
+    const fastRow = `<tr><td>${dateInput.value}</td><td>${minsNow} min</td><td>${typeText}</td></tr>`;
+    document.getElementById("creatorEntriesTable").insertAdjacentHTML("beforeend", fastRow);
+
+    stopCreatorTimer();
+    await saveCreatorSession(creatorStartTime,end,creatorUsageType);
+    // refresh from DB to stay in sync
     await loadCreatorSessions();
   };
 
