@@ -124,7 +124,6 @@
       <button id="stopCreator">Stop</button>
       <div class="small-text">Session Timer: <span id="creatorTimer">00:00</span></div>
 
-      <!-- ✅ Added Creator Sessions Table -->
       <table>
         <thead>
           <tr>
@@ -201,7 +200,6 @@
 
   checkSession();
 
-  /* ===== Clock logic ===== */
   const dateInput=document.getElementById("selectedDate");
   const savedDate=localStorage.getItem("selectedDate");
   if(savedDate) dateInput.value=savedDate;
@@ -246,7 +244,6 @@
     });
   }
 
-  // ===== Clock-in Logs =====
   async function loadLogs(){
     if(!currentUser)return;
     const date=dateInput.value;
@@ -262,7 +259,6 @@
     });
   }
 
-  // ===== Creator Sessions =====
   async function loadCreatorSessions(){
     if(!currentUser)return;
     const date=dateInput.value;
@@ -273,7 +269,8 @@
       const durMs=new Date(s.end_time)-new Date(s.start_time);
       const mins=Math.floor(durMs/60000);
       const dur=`${Math.floor(mins/60)}h ${mins%60}m`;
-      const row=`<tr><td>${s.session_date}</td><td>${new Date(s.start_time).toLocaleTimeString("en-GB")}</td><td>${new Date(s.end_time).toLocaleTimeString("en-GB")}</td><td>${dur}</td><td>${s.usage_type}</td></tr>`;
+      const typeText = s.usage_type ? `(${s.usage_type})` : "";
+      const row=`<tr><td>${s.session_date}</td><td>${new Date(s.start_time).toLocaleTimeString("en-GB")}</td><td>${new Date(s.end_time).toLocaleTimeString("en-GB")}</td><td>${dur}</td><td>${typeText}</td></tr>`;
       tbody.insertAdjacentHTML("beforeend",row);
     });
   }
@@ -284,7 +281,6 @@
     await loadCreatorSessions();
   }
 
-  // ===== Clock in/out buttons =====
   let clockedIn=false,startTime;
   document.getElementById("clockInBtn").onclick=()=>{
     if(clockedIn)return alert("Already clocked in!");
@@ -295,9 +291,6 @@
     if(!clockedIn)return alert("Not clocked in!");
     clockedIn=false;
     const endTime=new Date();
-    const diff=endTime-startTime;
-    const mins=Math.floor(diff/60000);
-    const dur=`${Math.floor(mins/60)}h ${mins%60}m`;
     const act=document.getElementById("activityInput").value;
     const tag=document.getElementById("tagInput").value;
     const notes=document.getElementById("notesInput").value;
@@ -310,7 +303,6 @@
     document.getElementById("clockStatus").textContent="Not currently clocked in.";
   };
 
-  // ===== Creator Timer =====
   let creatorTimerActive=false,creatorStartTime,creatorUsageType,creatorInterval;
   function startCreatorTimer(){
     creatorStartTime=new Date();
@@ -345,5 +337,6 @@
   </script>
 </body>
 </html>
+
 
 
