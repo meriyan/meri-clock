@@ -124,7 +124,6 @@
       <button id="stopCreator">Stop</button>
       <div class="small-text">Session Timer: <span id="creatorTimer">00:00</span></div>
 
-      <!-- Creator Sessions table -->
       <table>
         <thead>
           <tr><th>Date</th><th>Duration</th><th>Type</th></tr>
@@ -135,6 +134,12 @@
 
     <div class="section">
       <h2 id="monthTitle"></h2>
+      <div class="small-text">
+        Progress: <span id="progressPercent">0%</span>
+        <div style="background:#2b0033;height:15px;width:80%;margin:10px auto;border-radius:8px;">
+          <div id="progressBar" style="height:15px;width:0%;background:#ff80c8;border-radius:8px;transition:width 0.4s;"></div>
+        </div>
+      </div>
       <table><tbody id="timeSlotsTable"></tbody></table>
     </div>
   </div>
@@ -217,12 +222,23 @@
     const date=dateInput.value;
     const {data}=await supabase.from("social_checks").select("*").eq("user_id",currentUser.id).eq("check_date",date);
     const map={};(data||[]).forEach(r=>map[r.slot_time]=r.checked);
-    document.querySelectorAll("#timeSlotsTable input").forEach(cb=>cb.checked=!!map[cb.dataset.time]);
+    document.querySelectorAll("#timeSlotsTable input").forEach(cb=>{cb.checked=!!map[cb.dataset.time];});
+    updateProgressBar();
   }
+
   async function saveCheckbox(cb){
     if(!currentUser)return;
     const date=dateInput.value;
     await supabase.from("social_checks").upsert({user_id:currentUser.id,check_date:date,slot_time:cb.dataset.time,checked:cb.checked});
+    updateProgressBar();
+  }
+
+  function updateProgressBar(){
+    const all=document.querySelectorAll("#timeSlotsTable input").length;
+    const checked=document.querySelectorAll("#timeSlotsTable input:checked").length;
+    const percent=Math.round((checked/all)*100);
+    document.getElementById("progressPercent").textContent=percent+"%";
+    document.getElementById("progressBar").style.width=percent+"%";
   }
 
   async function loadLogs(){
@@ -305,20 +321,17 @@
     if(!creatorTimerActive)return;
     creatorTimerActive=false;
     const end=new Date();
-
-    // Add visible entry immediately
     const minsNow=Math.floor((end-creatorStartTime)/60000);
     const typeText=creatorUsageType?`(${creatorUsageType})`:"";
     const row=`<tr><td>${dateInput.value}</td><td>${minsNow} min</td><td>${typeText}</td></tr>`;
     document.getElementById("creatorEntriesTable").insertAdjacentHTML("beforeend",row);
-
     stopCreatorTimer();
     await saveCreatorSession(creatorStartTime,end,creatorUsageType);
-    // Removed loadCreatorSessions() → no flicker
   };
 
   supabase.auth.onAuthStateChange((_e,s)=>{if(s?.user)loadDataForDate();});
   </script>
 </body>
 </html>
+
 
