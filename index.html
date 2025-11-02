@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Meri Clock</title>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.3"></script>
   <style>
     body {
       font-family: "Poppins", sans-serif;
@@ -132,8 +132,11 @@
   </div>
 
   <script>
+  // ✅ Create Supabase client (this line was missing)
   const supabaseUrl = "https://eqqunclfxzmfosjwzwki.supabase.co";
   const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVxcXVuY2xmeHptZm9zand6d2tpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjE5NDg1MDQsImV4cCI6MjA3NzUyNDUwNH0.1N5pYTxFf6PjCMgQ0nUICsc9jLL58LuDZgX_s8yLe_w";
+  const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+
   const authBox = document.getElementById("authBox");
   const appContainer = document.getElementById("appContainer");
   const loginBtn = document.getElementById("loginBtn");
@@ -160,27 +163,48 @@
     authBox.style.display = "none";
     appContainer.style.display = "";
     logoutBtn.style.display = "";
+    authMsg.textContent = "";
   }
 
   loginBtn.onclick = async ()=>{
     const email=document.getElementById("authEmail").value.trim();
     const password=document.getElementById("authPassword").value;
-    const {error}=await supabase.auth.signInWithPassword({email,password});
-    if(error) authMsg.textContent=error.message; else checkSession();
+    authMsg.textContent = "⏳ Logging in...";
+    try {
+      const {error} = await supabase.auth.signInWithPassword({email,password});
+      if(error) authMsg.textContent = "❌ " + error.message;
+      else {
+        authMsg.textContent = "✅ Logged in!";
+        checkSession();
+      }
+    } catch(err){
+      authMsg.textContent = "🚫 Connection failed — check Supabase URL & CORS settings.";
+      console.error(err);
+    }
   };
+
   signupBtn.onclick = async ()=>{
     const email=document.getElementById("authEmail").value.trim();
     const password=document.getElementById("authPassword").value;
-    const {error}=await supabase.auth.signUp({email,password});
-    authMsg.textContent=error?error.message:"Check your email to confirm.";
+    authMsg.textContent = "⏳ Signing up...";
+    try {
+      const {error}=await supabase.auth.signUp({email,password});
+      authMsg.textContent=error?("❌ "+error.message):"✅ Check your email to confirm.";
+    } catch(err){
+      authMsg.textContent = "🚫 Connection failed — check Supabase URL & CORS settings.";
+      console.error(err);
+    }
   };
+
   logoutBtn.onclick = async ()=>{
     await supabase.auth.signOut();
     showLogin("Logged out.");
   };
+
   supabase.auth.onAuthStateChange((_event,session)=>{
     if(session?.user) showApp(session.user); else showLogin();
   });
+
   checkSession();
 
   /* ===== Clock logic ===== */
