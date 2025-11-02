@@ -335,11 +335,29 @@
     },1000);
   }
   function stopCreatorTimer(){clearInterval(creatorInterval);document.getElementById("creatorTimer").textContent="00:00";}
-  async function saveCreatorSession(start,end,type){
-    if(!currentUser)return;
-    const date=dateInput.value;
-    await supabase.from("social_sessions").insert({user_id:currentUser.id,start_time:start.toISOString(),end_time:end.toISOString(),usage_type:type,session_date:date});
+async function saveCreatorSession(start, end, type) {
+  if (!currentUser) return;
+  const date = dateInput.value;
+
+  const payload = {
+    user_id: currentUser.id,
+    start_time: start.toISOString(),
+    end_time: end.toISOString(),
+    usage_type: type,
+    session_date: date
+  };
+
+  console.log("🧾 Inserting session:", payload);
+
+  const { error } = await supabase.from("social_sessions").insert(payload);
+
+  if (error) {
+    console.error("❌ saveCreatorSession error:", error.message);
+  } else {
+    console.log("✅ Creator session saved:", date, type);
   }
+}
+
 
   document.getElementById("startCreatorSocial").onclick=()=>{if(creatorTimerActive)return;creatorUsageType="With Social";creatorTimerActive=true;startCreatorTimer();};
   document.getElementById("startCreatorNoSocial").onclick=()=>{if(creatorTimerActive)return;creatorUsageType="No Social";creatorTimerActive=true;startCreatorTimer();};
