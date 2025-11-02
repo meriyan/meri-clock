@@ -384,17 +384,23 @@
     startCreatorTimer();
   };
 
-  document.getElementById("stopCreator").onclick = async () => {
-    if (!creatorTimerActive) return;
-    creatorTimerActive = false;
-    const end = new Date();
-    const minsNow = Math.floor((end - creatorStartTime) / 60000);
-    const typeText = creatorUsageType ? `(${creatorUsageType.replace("_", " ")})` : "";
-    const row = `<tr><td>${dateInput.value}</td><td>${minsNow} min</td><td>${typeText}</td></tr>`;
-    document.getElementById("creatorEntriesTable").insertAdjacentHTML("beforeend", row);
-    stopCreatorTimer();
-    await saveCreatorSession(creatorStartTime, end, creatorUsageType);
-  };
+document.getElementById("stopCreator").onclick = async () => {
+  if (!creatorTimerActive) return;
+  creatorTimerActive = false;
+
+  const end = new Date();
+  const diffMs = end - creatorStartTime;
+  const minsNow = Math.floor(diffMs / 60000);
+  const secsNow = Math.floor((diffMs % 60000) / 1000);
+
+  const typeText = creatorUsageType ? `(${creatorUsageType.replace("_", " ")})` : "";
+  const row = `<tr><td>${dateInput.value}</td><td>${minsNow}m ${secsNow}s</td><td>${typeText}</td></tr>`;
+  document.getElementById("creatorEntriesTable").insertAdjacentHTML("beforeend", row);
+
+  stopCreatorTimer();
+  await saveCreatorSession(creatorStartTime, end, creatorUsageType);
+};
+
 
 
   supabase.auth.onAuthStateChange((_e,s)=>{if(s?.user)loadDataForDate();});
