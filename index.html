@@ -124,12 +124,10 @@
       <button id="stopCreator">Stop</button>
       <div class="small-text">Session Timer: <span id="creatorTimer">00:00</span></div>
 
-      <!-- Creator Sessions table: Date · Duration (minutes) · Type -->
+      <!-- Creator Sessions table -->
       <table>
         <thead>
-          <tr>
-            <th>Date</th><th>Duration</th><th>Type</th>
-          </tr>
+          <tr><th>Date</th><th>Duration</th><th>Type</th></tr>
         </thead>
         <tbody id="creatorEntriesTable"></tbody>
       </table>
@@ -147,6 +145,7 @@
   const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
 
   let currentUser = null;
+
   const authBox=document.getElementById("authBox");
   const appContainer=document.getElementById("appContainer");
   const authMsg=document.getElementById("authMsg");
@@ -159,43 +158,48 @@
     const user = data.session?.user;
     if(user) showApp(user); else showLogin();
   }
+
   function showLogin(msg){
     authBox.style.display="";appContainer.style.display="none";logoutBtn.style.display="none";
     authMsg.textContent=msg||"";
   }
+
   function showApp(user){
     currentUser=user;
     authBox.style.display="none";appContainer.style.display="";logoutBtn.style.display="";
     authMsg.textContent="";
     loadDataForDate();
   }
+
   loginBtn.onclick=async()=>{
     const email=document.getElementById("authEmail").value.trim();
     const password=document.getElementById("authPassword").value;
     const {error}=await supabase.auth.signInWithPassword({email,password});
     if(error) authMsg.textContent="❌ "+error.message; else checkSession();
   };
+
   signupBtn.onclick=async()=>{
     const email=document.getElementById("authEmail").value.trim();
     const password=document.getElementById("authPassword").value;
     const {error}=await supabase.auth.signUp({email,password});
     authMsg.textContent=error?error.message:"Check your email to confirm.";
   };
+
   logoutBtn.onclick=async()=>{await supabase.auth.signOut();showLogin("Logged out.");};
+
   supabase.auth.onAuthStateChange((_e,s)=>{if(s?.user)showApp(s.user);else showLogin();});
   checkSession();
 
-  // Date, clock, title
   const dateInput=document.getElementById("selectedDate");
   const savedDate=localStorage.getItem("selectedDate");
   if(savedDate)dateInput.value=savedDate;else{const t=new Date().toISOString().split("T")[0];dateInput.value=t;localStorage.setItem("selectedDate",t);}
   dateInput.addEventListener("change",()=>{localStorage.setItem("selectedDate",dateInput.value);loadDataForDate();});
+
   function updateClock(){document.getElementById("mainClock").textContent=new Date().toLocaleTimeString("en-GB");}
   setInterval(updateClock,1000);updateClock();
   const monthNames=["January","February","March","April","May","June","July","August","September","October","November","December"];
   const now=new Date();document.getElementById("monthTitle").textContent=`${monthNames[now.getMonth()]} ${now.getFullYear()}`;
 
-  // Time slots + checkboxes
   const table=document.getElementById("timeSlotsTable");
   for(let h=0;h<24;h++){
     const row=document.createElement("tr");
@@ -207,6 +211,7 @@
       td.append(label,document.createElement("br"),cb);row.appendChild(td);
     }table.appendChild(row);
   }
+
   async function loadCheckboxes(){
     if(!currentUser)return;
     const date=dateInput.value;
@@ -220,7 +225,6 @@
     await supabase.from("social_checks").upsert({user_id:currentUser.id,check_date:date,slot_time:cb.dataset.time,checked:cb.checked});
   }
 
-  // Clock entries
   async function loadLogs(){
     if(!currentUser)return;
     const date=dateInput.value;
@@ -236,7 +240,6 @@
     });
   }
 
-  // Creator sessions: show ONLY minutes
   async function loadCreatorSessions(){
     if(!currentUser)return;
     const date=dateInput.value;
@@ -258,7 +261,6 @@
     await loadCreatorSessions();
   }
 
-  // Clock in/out
   let clockedIn=false,startTime;
   document.getElementById("clockInBtn").onclick=()=>{
     if(clockedIn)return alert("Already clocked in!");
@@ -278,7 +280,7 @@
     document.getElementById("clockStatus").textContent="Not currently clocked in.";
   };
 
-  // Creator timer + save
+  // Creator session - FIXED (no flicker)
   let creatorTimerActive=false,creatorStartTime,creatorUsageType,creatorInterval;
   function startCreatorTimer(){
     creatorStartTime=new Date();
@@ -295,25 +297,28 @@
     const date=dateInput.value;
     await supabase.from("social_sessions").insert({user_id:currentUser.id,start_time:start.toISOString(),end_time:end.toISOString(),usage_type:type,session_date:date});
   }
+
   document.getElementById("startCreatorSocial").onclick=()=>{if(creatorTimerActive)return;creatorUsageType="With Social";creatorTimerActive=true;startCreatorTimer();};
   document.getElementById("startCreatorNoSocial").onclick=()=>{if(creatorTimerActive)return;creatorUsageType="No Social";creatorTimerActive=true;startCreatorTimer();};
+
   document.getElementById("stopCreator").onclick=async()=>{
     if(!creatorTimerActive)return;
     creatorTimerActive=false;
     const end=new Date();
-    // show immediately (minutes only)
-    const minsNow = Math.floor((end - creatorStartTime)/60000);
-    const typeText = creatorUsageType ? `(${creatorUsageType})` : "";
-    const fastRow = `<tr><td>${dateInput.value}</td><td>${minsNow} min</td><td>${typeText}</td></tr>`;
-    document.getElementById("creatorEntriesTable").insertAdjacentHTML("beforeend", fastRow);
+
+    // Add visible entry immediately
+    const minsNow=Math.floor((end-creatorStartTime)/60000);
+    const typeText=creatorUsageType?`(${creatorUsageType})`:"";
+    const row=`<tr><td>${dateInput.value}</td><td>${minsNow} min</td><td>${typeText}</td></tr>`;
+    document.getElementById("creatorEntriesTable").insertAdjacentHTML("beforeend",row);
 
     stopCreatorTimer();
     await saveCreatorSession(creatorStartTime,end,creatorUsageType);
-    // refresh from DB to stay in sync
-    await loadCreatorSessions();
+    // Removed loadCreatorSessions() → no flicker
   };
 
   supabase.auth.onAuthStateChange((_e,s)=>{if(s?.user)loadDataForDate();});
   </script>
 </body>
 </html>
+
