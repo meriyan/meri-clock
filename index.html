@@ -1,463 +1,294 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Meri Clock</title>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <style>
-    /* Existing CSS styles from your code... */
-    body {
-      font-family: "Poppins", sans-serif;
-      background-color: #1a001f;
-      color: #f7c6ff;
-      text-align: center;
-      margin: 0;
-      padding: 0;
-    }
-    h1, h2, h3 {
-      color: #ffb6ff;
-    }
-    .clock {
-      font-size: 48px;
-      margin: 20px 0;
-      color: #ffb6ff;
-      text-shadow: 0 0 10px #ff80c8;
-    }
-    .section {
-      margin: 30px auto;
-      padding: 20px;
-      border: 1px solid #ff80c8;
-      border-radius: 15px;
-      width: 90%;
-      max-width: 700px;
-      box-shadow: 0 0 20px rgba(255, 182, 255, 0.2);
-      background-color: rgba(255, 182, 255, 0.05);
-    }
-    button {
-      background-color: #ff80c8;
-      color: white;
-      border: none;
-      padding: 10px 20px;
-      border-radius: 10px;
-      font-size: 16px;
-      cursor: pointer;
-      margin: 5px;
-      transition: 0.3s;
-    }
-    button:hover:not(:disabled) {
-      background-color: #ff9ee0;
-    }
-    button:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
-    input, select {
-      padding: 10px;
-      border-radius: 8px;
-      border: 1px solid #ff80c8;
-      background-color: #2b0033;
-      color: #f7c6ff;
-      margin: 5px;
-    }
-    table {
-      margin: 20px auto;
-      border-collapse: collapse;
-      width: 90%;
-      max-width: 800px;
-    }
-    th, td {
-      border: 1px solid #ff80c8;
-      padding: 8px;
-      text-align: center;
-    }
-    th {
-      background-color: #2b0033;
-      color: #ffb6ff;
-    }
-    td {
-      background-color: #1a001f;
-    }
-    .small-text {
-      font-size: 14px;
-      opacity: 0.8;
-      margin-top: 5px;
-    }
-    #authSection {
-      display: block; /* Initially visible */
-    }
-    #appContent {
-      display: none; /* Initially hidden */
-    }
-  </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Meri Clock</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    body {
+      font-family: "Poppins", sans-serif;
+      background-color: #1a001f;
+      color: #f7c6ff;
+      text-align: center;
+      margin: 0;
+      padding: 0;
+    }
+    h1, h2, h3 {
+      color: #ffb6ff;
+    }
+    .clock {
+      font-size: 48px;
+      margin: 20px 0;
+      color: #ffb6ff;
+      text-shadow: 0 0 10px #ff80c8;
+    }
+    .section {
+      margin: 30px auto;
+      padding: 20px;
+      border: 1px solid #ff80c8;
+      border-radius: 15px;
+      width: 90%;
+      max-width: 700px;
+      box-shadow: 0 0 20px rgba(255, 182, 255, 0.2);
+      background-color: rgba(255, 182, 255, 0.05);
+    }
+    button {
+      background-color: #ff80c8;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 10px;
+      font-size: 16px;
+      cursor: pointer;
+      margin: 5px;
+      transition: 0.3s;
+    }
+    button:hover {
+      background-color: #ff9ee0;
+    }
+    input, select {
+      padding: 10px;
+      border-radius: 8px;
+      border: 1px solid #ff80c8;
+      background-color: #2b0033;
+      color: #f7c6ff;
+    }
+    table {
+      margin: 20px auto;
+      border-collapse: collapse;
+      width: 90%;
+      max-width: 800px;
+    }
+    th, td {
+      border: 1px solid #ff80c8;
+      padding: 8px;
+      text-align: center;
+    }
+    th {
+      background-color: #2b0033;
+      color: #ffb6ff;
+    }
+    td {
+      background-color: #1a001f;
+    }
+    .small-text {
+      font-size: 14px;
+      opacity: 0.8;
+    }
+  </style>
 </head>
 <body>
-  <h1>💖 Meri’s Motivational Clock 💖</h1>
-  <div class="clock" id="mainClock"></div>
+  <h1>💖 Meri’s Motivational Clock 💖</h1>
+  <div class="clock" id="mainClock"></div>
 
-  <div id="authSection" class="section">
-    <h2>Login / Sign Up</h2>
-    <input type="email" id="authEmail" placeholder="Email" required />
-    <input type="password" id="authPassword" placeholder="Password" required />
-    <button id="authBtn">Log In / Sign Up</button>
-    <button id="logoutBtn" disabled>Log Out</button>
-    <div id="authStatus" class="small-text">Please log in to use the app.</div>
-  </div>
+  <div class="section">
+    <h2>Clock In / Clock Out</h2>
+    <input type="text" id="activityInput" placeholder="What are you doing?" />
+    <select id="tagInput">
+      <option value="">No tag</option>
+      <option value="Study">Study</option>
+      <option value="Work">Work</option>
+      <option value="Fitness">Fitness</option>
+      <option value="Other">Other</option>
+    </select>
+    <input type="text" id="notesInput" placeholder="Notes (optional)" />
+    <button id="clockInBtn">Clock In</button>
+    <button id="clockOutBtn">Clock Out</button>
+    <div id="clockStatus" class="small-text">Not currently clocked in.</div>
+  </div>
 
-  <div id="appContent">
-    <div class="section">
-      <h2>Clock In / Clock Out</h2>
-      <input type="text" id="activityInput" placeholder="What are you doing?" />
-      <select id="tagInput">
-        <option value="">No tag</option>
-        <option value="Study">Study</option>
-        <option value="Work">Work</option>
-        <option value="Fitness">Fitness</option>
-        <option value="Other">Other</option>
-      </select>
-      <input type="text" id="notesInput" placeholder="Notes (optional)" />
-      <button id="clockInBtn">Clock In</button>
-      <button id="clockOutBtn" disabled>Clock Out</button>
-      <div id="clockStatus" class="small-text">Not currently clocked in.</div>
-    </div>
+  <div class="section">
+    <h2>Entries</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Start</th>
+          <th>End</th>
+          <th>Duration</th>
+          <th>Activity</th>
+          <th>Tag</th>
+          <th>Notes</th>
+        </tr>
+      </thead>
+      <tbody id="entriesTable"></tbody>
+    </table>
+  </div>
 
-    <div class="section">
-      <h2>Entries</h2>
-      <table>
-        <thead>
-          <tr>
-            <th>Date</th>
-            <th>Start</th>
-            <th>End</th>
-            <th>Duration</th>
-            <th>Activity</th>
-            <th>Tag</th>
-            <th>Notes</th>
-          </tr>
-        </thead>
-        <tbody id="entriesTable"></tbody>
-      </table>
-    </div>
+  <div class="section">
+    <h2>Creator Sessions</h2>
+    <button id="startCreatorSocial">Start Creator (With Social)</button>
+    <button id="startCreatorNoSocial">Start Creator (No Social)</button>
+    <button id="stopCreator">Stop</button>
+    <div class="small-text">Session Timer: <span id="creatorTimer">00:00</span></div>
+  </div>
 
-    <div class="section">
-      <h2>Creator Sessions</h2>
-      <button id="startCreatorSocial">Start Creator (With Social)</button>
-      <button id="startCreatorNoSocial">Start Creator (No Social)</button>
-      <button id="stopCreator" disabled>Stop</button>
-      <div class="small-text">Session Timer: <span id="creatorTimer">00:00</span></div>
-    </div>
+  <div class="section">
+    <h2 id="monthTitle"></h2>
+    <table>
+      <tbody id="timeSlotsTable"></tbody>
+    </table>
+  </div>
 
-    <div class="section">
-      <h2 id="monthTitle"></h2>
-      <table>
-        <tbody id="timeSlotsTable"></tbody>
-      </table>
-    </div>
-  </div>
+  <script>
+    // ✅ Initialize Supabase
+    const supabaseUrl = "https://YOUR_PROJECT_URL.supabase.co"; 
+    const supabaseKey = "YOUR_SUPABASE_ANON_KEY";
+    const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+    const user_id = "meri_default_user"; // static user ID (no login needed)
 
-  <script>
-    // !!! REPLACE THESE WITH YOUR ACTUAL SUPABASE DETAILS !!!
-    const supabaseUrl = "https://YOUR_PROJECT_URL.supabase.co"; 
-    const supabaseKey = "YOUR_SUPABASE_ANON_KEY";
-    const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+    // ✅ Flip Clock
+    function updateClock() {
+      const now = new Date();
+      document.getElementById("mainClock").textContent = now.toLocaleTimeString("en-GB");
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
 
-    // --- AUTHENTICATION LOGIC (NEW/FIXED) ---
-    const authBtn = document.getElementById("authBtn");
-    const logoutBtn = document.getElementById("logoutBtn");
-    const authEmail = document.getElementById("authEmail");
-    const authPassword = document.getElementById("authPassword");
-    const authStatus = document.getElementById("authStatus");
-    const appContent = document.getElementById("appContent");
-    const authSection = document.getElementById("authSection");
-    
-    // Function to check user status and update UI
-    async function checkAuthState() {
-      const { data: { user } } = await supabase.auth.getUser();
+    // ✅ Month + Year title
+    const monthNames = [
+      "January","February","March","April","May","June","July","August","September","October","November","December"
+    ];
+    const now = new Date();
+    document.getElementById("monthTitle").textContent = `${monthNames[now.getMonth()]} ${now.getFullYear()}`;
 
-      if (user) {
-        authSection.style.display = 'none';
-        appContent.style.display = 'block';
-        authStatus.textContent = `Logged in as: ${user.email}`;
-        logoutBtn.disabled = false;
-        // Now that user is logged in, load all user data
-        loadEntries();
-      } else {
-        authSection.style.display = 'block';
-        appContent.style.display = 'none';
-        authStatus.textContent = "Please log in to use the app.";
-        logoutBtn.disabled = true;
-      }
-    }
+    // ✅ Generate 48 half-hour checkboxes
+    const table = document.getElementById("timeSlotsTable");
+    for (let h = 0; h < 24; h++) {
+      const row = document.createElement("tr");
+      for (let m = 0; m < 2; m++) {
+        const td = document.createElement("td");
+        const timeLabel = document.createTextNode(
+          `${String(h).padStart(2, "0")}:${m === 0 ? "00" : "30"}`
+        );
+        const checkbox = document.createElement("input");
+        checkbox.type = "checkbox";
+        checkbox.checked = false;
+        td.appendChild(timeLabel);
+        td.appendChild(document.createElement("br"));
+        td.appendChild(checkbox);
+        row.appendChild(td);
+      }
+      table.appendChild(row);
+    }
 
-    // Handle Log In / Sign Up
-    authBtn.addEventListener("click", async () => {
-      const email = authEmail.value;
-      const password = authPassword.value;
+    // ✅ Clock In / Out
+    let clockedIn = false;
+    let startTime;
 
-      if (!email || !password) {
-        alert("Please enter email and password.");
-        return;
-      }
-      authBtn.disabled = true;
+    document.getElementById("clockInBtn").addEventListener("click", () => {
+      if (clockedIn) return alert("Already clocked in!");
+      clockedIn = true;
+      startTime = new Date();
+      document.getElementById("clockStatus").textContent = "Clocked in at " + startTime.toLocaleTimeString("en-GB");
+    });
 
-      // 1. Try to Sign In
-      let { error } = await supabase.auth.signInWithPassword({ email, password });
+    document.getElementById("clockOutBtn").addEventListener("click", async () => {
+      if (!clockedIn) return alert("Not clocked in!");
+      clockedIn = false;
+      const endTime = new Date();
+      const durationMs = endTime - startTime;
+      const durationMin = Math.floor(durationMs / 60000);
+      const durationFormatted = `${Math.floor(durationMin / 60)}h ${durationMin % 60}m`;
 
-      if (error) {
-        console.log("Sign In failed, attempting Sign Up:", error.message);
-        // 2. If Sign In fails (e.g., user not found), try to Sign Up
-        const { error: signUpError } = await supabase.auth.signUp({ email, password });
+      const activity = document.getElementById("activityInput").value;
+      const tag = document.getElementById("tagInput").value;
+      const notes = document.getElementById("notesInput").value;
 
-        if (signUpError) {
-          alert(`Authentication Error: ${signUpError.message}`);
-        } else {
-          alert("Sign Up successful! Check your email for a confirmation link (if enabled).");
-        }
-      } else {
-        alert("Login successful!");
-      }
+      const { data, error } = await supabase.from("logs").insert([
+        {
+          user_id,
+          activity,
+          tag,
+          notes,
+          start_time: startTime.toISOString(),
+          end_time: endTime.toISOString(),
+          log_date: new Date().toISOString().split("T")[0],
+        },
+      ]);
+      if (error) console.error(error);
 
-      authBtn.disabled = false;
-      checkAuthState(); // Update the UI after auth attempt
-    });
+      const row = `<tr>
+        <td>${new Date().toLocaleDateString()}</td>
+        <td>${startTime.toLocaleTimeString("en-GB")}</td>
+        <td>${endTime.toLocaleTimeString("en-GB")}</td>
+        <td>${durationFormatted}</td>
+        <td>${activity}</td>
+        <td>${tag}</td>
+        <td>${notes}</td>
+      </tr>`;
+      document.getElementById("entriesTable").innerHTML += row;
 
-    // Handle Log Out
-    logoutBtn.addEventListener("click", async () => {
-      const { error } = await supabase.auth.signOut();
-      if (!error) {
-        alert("Logged out successfully.");
-        // Also reset local state
-        clockedIn = false;
-        creatorTimerActive = false;
-        stopCreatorTimer();
-        document.getElementById("entriesTable").innerHTML = "";
-        document.getElementById("clockStatus").textContent = "Not currently clocked in.";
-      } else {
-        console.error("Logout error:", error);
-        alert("Logout failed.");
-      }
-      checkAuthState();
-    });
+      document.getElementById("clockStatus").textContent = "Not currently clocked in.";
+    });
 
-    // --- CLOCK, DATA, AND EVENT HANDLERS (Adjusted to use auth) ---
+    // ✅ Creator Clock Logic
+    let creatorTimerActive = false;
+    let creatorStartTime;
+    let creatorUsageType;
+    let creatorInterval;
 
-    // ✅ Flip Clock
-    function updateClock() {
-      const now = new Date();
-      document.getElementById("mainClock").textContent = now.toLocaleTimeString("en-GB");
-    }
-    setInterval(updateClock, 1000);
-    updateClock();
+    function startCreatorTimer() {
+      creatorStartTime = new Date();
+      creatorInterval = setInterval(() => {
+        const diff = Math.floor((new Date() - creatorStartTime) / 1000);
+        const min = String(Math.floor(diff / 60)).padStart(2, "0");
+        const sec = String(diff % 60).padStart(2, "0");
+        document.getElementById("creatorTimer").textContent = `${min}:${sec}`;
+      }, 1000);
+    }
 
-    // ✅ Month + Year title
-    const monthNames = [
-      "January","February","March","April","May","June","July","August","September","October","November","December"
-    ];
-    const today = new Date();
-    document.getElementById("monthTitle").textContent = `${monthNames[today.getMonth()]} ${today.getFullYear()}`;
+    function stopCreatorTimer() {
+      clearInterval(creatorInterval);
+      document.getElementById("creatorTimer").textContent = "00:00";
+    }
 
-    // ✅ Generate 48 half-hour checkboxes
-    const table = document.getElementById("timeSlotsTable");
-    for (let h = 0; h < 24; h++) {
-      const row = document.createElement("tr");
-      for (let m = 0; m < 2; m++) {
-        const td = document.createElement("td");
-        const timeLabel = document.createTextNode(
-          `${String(h).padStart(2, "0")}:${m === 0 ? "00" : "30"}`
-        );
-        const checkbox = document.createElement("input");
-        checkbox.type = "checkbox";
-        checkbox.checked = false; // unchecked by default
-        td.appendChild(timeLabel);
-        td.appendChild(document.createElement("br"));
-        td.appendChild(checkbox);
-        row.appendChild(td);
-      }
-      table.appendChild(row);
-    }
+    async function saveCreatorSession(startTime, endTime, usageType) {
+      try {
+        const { data, error } = await supabase.from("social_sessions").insert([
+          {
+            user_id,
+            start_time: startTime.toISOString(),
+            end_time: endTime.toISOString(),
+            usage_type: usageType,
+            session_date: new Date().toISOString().split("T")[0],
+          },
+        ]);
 
-    // ✅ Clock In / Out
-    let clockedIn = false;
-    let startTime;
-    const clockOutBtn = document.getElementById("clockOutBtn");
-    const clockInBtn = document.getElementById("clockInBtn");
-    const entriesTable = document.getElementById("entriesTable");
+        if (error) {
+          console.error("Save creator session failed:", error);
+          alert(`Save creator session failed: ${error.message}`);
+        } else {
+          console.log("Creator session saved successfully:", data);
+        }
+      } catch (err) {
+        console.error("Unexpected error:", err);
+        alert("Unexpected error saving creator session.");
+      }
+    }
 
-    function formatDuration(ms) {
-      const durationMin = Math.floor(ms / 60000);
-      const h = Math.floor(durationMin / 60);
-      const m = durationMin % 60;
-      return `${h > 0 ? h + 'h ' : ''}${m}m`;
-    }
+    document.getElementById("startCreatorSocial").addEventListener("click", () => {
+      creatorTimerActive = true;
+      creatorUsageType = "With Social";
+      startCreatorTimer();
+    });
 
-    async function loadEntries() {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
+    document.getElementById("startCreatorNoSocial").addEventListener("click", () => {
+      creatorTimerActive = true;
+      creatorUsageType = "No Social";
+      startCreatorTimer();
+    });
 
-      const todayIso = new Date().toISOString().split("T")[0];
-      const { data: logs, error } = await supabase
-        .from("logs")
-        .select("*")
-        .eq("user_id", user.id)
-        .eq("log_date", todayIso) // Filter for today's date
-        .order("start_time", { ascending: false });
-
-      if (error) {
-        console.error("Error loading entries:", error);
-        return;
-      }
-
-      entriesTable.innerHTML = "";
-      logs.forEach(log => {
-        const s = new Date(log.start_time);
-        const e = log.end_time ? new Date(log.end_time) : null;
-        const duration = e ? formatDuration(e - s) : '...';
-
-        const row = `<tr>
-          <td>${s.toLocaleDateString()}</td>
-          <td>${s.toLocaleTimeString("en-GB")}</td>
-          <td>${e ? e.toLocaleTimeString("en-GB") : '-'}</td>
-          <td>${duration}</td>
-          <td>${log.activity || ''}</td>
-          <td>${log.tag || ''}</td>
-          <td>${log.notes || ''}</td>
-        </tr>`;
-        entriesTable.innerHTML += row;
-      });
-    }
-
-    clockInBtn.addEventListener("click", () => {
-      if (!supabase.auth.currentUser) return alert("Please log in first.");
-      if (clockedIn) return alert("Already clocked in!");
-      clockedIn = true;
-      startTime = new Date();
-      clockInBtn.disabled = true;
-      clockOutBtn.disabled = false;
-      document.getElementById("clockStatus").textContent = "Clocked in at " + startTime.toLocaleTimeString("en-GB");
-    });
-
-    clockOutBtn.addEventListener("click", async () => {
-      if (!clockedIn) return alert("Not clocked in!");
-      clockedIn = false;
-      const endTime = new Date();
-
-      const activity = document.getElementById("activityInput").value;
-      const tag = document.getElementById("tagInput").value;
-      const notes = document.getElementById("notesInput").value;
-      const durationMs = endTime - startTime;
-
-      const { data: { user } } = await supabase.auth.getUser();
-
-      await supabase.from("logs").insert([
-        {
-          user_id: user?.id || null,
-          activity,
-          tag,
-          notes,
-          start_time: startTime.toISOString(),
-          end_time: endTime.toISOString(),
-          log_date: new Date().toISOString().split("T")[0],
-        },
-      ]);
-
-      loadEntries(); // Reload the table
-      
-      clockInBtn.disabled = false;
-      clockOutBtn.disabled = true;
-      document.getElementById("clockStatus").textContent = "Not currently clocked in.";
-    });
-
-    // ✅ Creator Clock Logic
-    let creatorTimerActive = false;
-    let creatorStartTime;
-    let creatorUsageType;
-    let creatorInterval;
-    const startCreatorSocialBtn = document.getElementById("startCreatorSocial");
-    const startCreatorNoSocialBtn = document.getElementById("startCreatorNoSocial");
-    const stopCreatorBtn = document.getElementById("stopCreator");
-
-
-    function updateCreatorButtons() {
-      const disabled = creatorTimerActive || clockedIn;
-      startCreatorSocialBtn.disabled = disabled;
-      startCreatorNoSocialBtn.disabled = disabled;
-      stopCreatorBtn.disabled = !creatorTimerActive;
-      clockInBtn.disabled = clockedIn || creatorTimerActive;
-    }
-
-    function startCreatorTimer() {
-      creatorStartTime = new Date();
-      creatorInterval = setInterval(() => {
-        const diff = Math.floor((new Date() - creatorStartTime) / 1000);
-        const min = String(Math.floor(diff / 60)).padStart(2, "0");
-        const sec = String(diff % 60).padStart(2, "0");
-        document.getElementById("creatorTimer").textContent = `${min}:${sec}`;
-      }, 1000);
-      updateCreatorButtons();
-    }
-
-    function stopCreatorTimer() {
-      clearInterval(creatorInterval);
-      document.getElementById("creatorTimer").textContent = "00:00";
-      updateCreatorButtons();
-    }
-
-    async function saveCreatorSession(startTime, endTime, usageType) {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) { alert("No user logged in to save session!"); return; }
-
-      try {
-        const { error } = await supabase.from("social_sessions").insert([
-          {
-            user_id: user.id,
-            start_time: startTime.toISOString(),
-            end_time: endTime.toISOString(),
-            usage_type: usageType,
-            session_date: new Date().toISOString().split("T")[0],
-          },
-        ]);
-
-        if (error) {
-          console.error("Save creator session failed:", error);
-          alert(`Save creator session failed: ${error.message}`);
-        } else {
-          console.log("Creator session saved successfully.");
-        }
-      } catch (err) {
-        console.error("Unexpected error:", err);
-        alert("Unexpected error saving creator session.");
-      }
-    }
-
-    document.getElementById("startCreatorSocial").addEventListener("click", () => {
-      if (!supabase.auth.currentUser) return alert("Please log in first.");
-      if (clockedIn) return alert("Please Clock Out before starting a Creator Session.");
-      if (creatorTimerActive) return;
-      creatorTimerActive = true;
-      creatorUsageType = "With Social";
-      startCreatorTimer();
-    });
-
-    document.getElementById("startCreatorNoSocial").addEventListener("click", () => {
-      if (!supabase.auth.currentUser) return alert("Please log in first.");
-      if (clockedIn) return alert("Please Clock Out before starting a Creator Session.");
-      if (creatorTimerActive) return;
-      creatorTimerActive = true;
-      creatorUsageType = "No Social";
-      startCreatorTimer();
-    });
-
-    document.getElementById("stopCreator").addEventListener("click", async () => {
-      if (!creatorTimerActive) return;
-      creatorTimerActive = false;
-      const endTime = new Date();
-      await saveCreatorSession(creatorStartTime, endTime, creatorUsageType);
-      stopCreatorTimer();
-      updateCreatorButtons(); // Re-enable Clock In
-    });
-
-    // --- INITIALIZATION ---
-    document.addEventListener("DOMContentLoaded", checkAuthState);
-  </script>
+    document.getElementById("stopCreator").addEventListener("click", async () => {
+      if (!creatorTimerActive) return;
+      creatorTimerActive = false;
+      const endTime = new Date();
+      await saveCreatorSession(creatorStartTime, endTime, creatorUsageType);
+      stopCreatorTimer();
+    });
+  </script>
 </body>
 </html>
+
+
