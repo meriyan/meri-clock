@@ -220,35 +220,45 @@
     updateProgressBar();
   }
 
-async function saveCheckbox(cb) {
-  const slot_time = cb.dataset.time; // example: "00:00"
-  const date = selectedDate || new Date().toISOString().split("T")[0];
-  const { data: { user } } = await supabase.auth.getUser();
+  // ✅ FIXED saveCheckbox function
+  async function saveCheckbox(cb) {
+    const rawSlot = cb.dataset.time?.trim(); // ensure clean value
+    const date = dateInput.value || new Date().toISOString().split("T")[0];
+    const { data: { user } } = await supabase.auth.getUser();
 
-  if (!user) {
-    console.error("No user logged in!");
-    return;
+    if (!user) {
+      console.error("No user logged in!");
+      return;
+    }
+
+    // 🧩 Validate slot format
+    if (!rawSlot || !/^\d{2}:\d{2}$/.test(rawSlot)) {
+      console.error("Invalid slot_time format:", rawSlot);
+      return;
+    }
+
+    // ✅ Construct ISO timestamp safely
+    const slot_time = `${date}T${rawSlot}:00Z`;
+
+    try {
+      const { error } = await supabase
+        .from("social_checks")
+        .upsert(
+          {
+            user_id: user.id,
+            check_date: date,
+            slot_time,
+            checked: cb.checked
+          },
+          { onConflict: "user_id,check_date,slot_time" }
+        );
+
+      if (error) throw error;
+      console.log("✅ Checkbox saved:", rawSlot, cb.checked);
+    } catch (err) {
+      console.error("saveCheckbox error:", err);
+    }
   }
-
-  try {
-    const { error } = await supabase
-      .from("social_checks")
-      .upsert(
-        {
-          user_id: user.id,
-          check_date: date,
-          slot_time: new Date(`${date}T${slot_time}:00Z`).toISOString(),  // ensures valid timestamp-like string
-          checked: cb.checked
-        },
-        { onConflict: "user_id,check_date,slot_time" }
-      );
-
-    if (error) throw error;
-    console.log("✅ Checkbox saved:", slot_time, cb.checked);
-  } catch (err) {
-    console.error("saveCheckbox error:", err);
-  }
-}
 
   function updateProgressBar(){
     const cbs=[...document.querySelectorAll("#timeSlotsTable input")];
