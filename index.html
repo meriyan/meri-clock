@@ -125,231 +125,214 @@
       <div class="small-text">Session Timer: <span id="creatorTimer">00:00</span></div>
 
       <table>
-        <thead>
-          <tr><th>Date</th><th>Duration</th><th>Type</th></tr>
-        </thead>
+        <thead><tr><th>Date</th><th>Duration</th><th>Type</th></tr></thead>
         <tbody id="creatorEntriesTable"></tbody>
       </table>
     </div>
 
     <div class="section">
       <h2 id="monthTitle"></h2>
-      <div class="small-text">
-        Progress: <span id="progressPercent">0%</span>
-        <div style="background:#2b0033;height:15px;width:80%;margin:10px auto;border-radius:8px;">
-          <div id="progressBar" style="height:15px;width:0%;background:#ff80c8;border-radius:8px;transition:width 0.4s;"></div>
-        </div>
-      </div>
+      <div class="small-text">Progress: <span id="progressPercent">0%</span></div>
+      <progress id="progressBar" max="100" value="0" style="width:80%;height:12px;"></progress>
       <table><tbody id="timeSlotsTable"></tbody></table>
     </div>
   </div>
 
   <script>
-const supabaseUrl = "https://eqqunclfxzmfosjwzwki.supabase.co";
-const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVxcXVuY2xmeHptZm9zand6d2tpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjE5NDg1MDQsImV4cCI6MjA3NzUyNDUwNH0.1N5pYTxFf6PjCMgQ0nUICsc9jLL58LuDZgX_s8yLe_w";
-const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+  const supabaseUrl = "https://eqqunclfxzmfosjwzwki.supabase.co";
+  const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVxcXVuY2xmeHptZm9zand6d2tpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjE5NDg1MDQsImV4cCI6MjA3NzUyNDUwNH0.1N5pYTxFf6PjCMgQ0nUICsc9jLL58LuDZgX_s8yLe_w";
+  const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
 
-let currentUser = null;
+  let currentUser = null;
 
-const authBox=document.getElementById("authBox");
-const appContainer=document.getElementById("appContainer");
-const authMsg=document.getElementById("authMsg");
-const loginBtn=document.getElementById("loginBtn");
-const signupBtn=document.getElementById("signupBtn");
-const logoutBtn=document.getElementById("logoutBtn");
+  const authBox=document.getElementById("authBox");
+  const appContainer=document.getElementById("appContainer");
+  const authMsg=document.getElementById("authMsg");
+  const loginBtn=document.getElementById("loginBtn");
+  const signupBtn=document.getElementById("signupBtn");
+  const logoutBtn=document.getElementById("logoutBtn");
 
-async function checkSession(){
-  const { data } = await supabase.auth.getSession();
-  const user = data.session?.user;
-  if(user) showApp(user); else showLogin();
-}
+  async function checkSession(){
+    const { data } = await supabase.auth.getSession();
+    const user = data.session?.user;
+    if(user) showApp(user); else showLogin();
+  }
 
-function showLogin(msg){
-  authBox.style.display="";appContainer.style.display="none";logoutBtn.style.display="none";
-  authMsg.textContent=msg||"";
-}
+  function showLogin(msg){
+    authBox.style.display="";appContainer.style.display="none";logoutBtn.style.display="none";
+    authMsg.textContent=msg||"";
+  }
 
-function showApp(user){
-  currentUser=user;
-  authBox.style.display="none";appContainer.style.display="";logoutBtn.style.display="";
-  authMsg.textContent="";
-  loadDataForDate();
-}
+  function showApp(user){
+    currentUser=user;
+    authBox.style.display="none";appContainer.style.display="";logoutBtn.style.display="";
+    loadDataForDate();
+  }
 
-loginBtn.onclick=async()=>{
-  const email=document.getElementById("authEmail").value.trim();
-  const password=document.getElementById("authPassword").value;
-  const {error}=await supabase.auth.signInWithPassword({email,password});
-  if(error) authMsg.textContent="❌ "+error.message; else checkSession();
-};
+  loginBtn.onclick=async()=>{
+    const email=document.getElementById("authEmail").value.trim();
+    const password=document.getElementById("authPassword").value;
+    const {error}=await supabase.auth.signInWithPassword({email,password});
+    if(error) authMsg.textContent="❌ "+error.message; else checkSession();
+  };
 
-signupBtn.onclick=async()=>{
-  const email=document.getElementById("authEmail").value.trim();
-  const password=document.getElementById("authPassword").value;
-  const {error}=await supabase.auth.signUp({email,password});
-  authMsg.textContent=error?error.message:"Check your email to confirm.";
-};
+  signupBtn.onclick=async()=>{
+    const email=document.getElementById("authEmail").value.trim();
+    const password=document.getElementById("authPassword").value;
+    const {error}=await supabase.auth.signUp({email,password});
+    authMsg.textContent=error?error.message:"Check your email to confirm.";
+  };
 
-logoutBtn.onclick=async()=>{await supabase.auth.signOut();showLogin("Logged out.");};
+  logoutBtn.onclick=async()=>{await supabase.auth.signOut();showLogin("Logged out.");};
 
-supabase.auth.onAuthStateChange((_e,s)=>{if(s?.user)showApp(s.user);else showLogin();});
-checkSession();
+  supabase.auth.onAuthStateChange((_e,s)=>{if(s?.user)showApp(s.user);else showLogin();});
+  checkSession();
 
-const dateInput=document.getElementById("selectedDate");
-const savedDate=localStorage.getItem("selectedDate");
-if(savedDate)dateInput.value=savedDate;else{const t=new Date().toISOString().split("T")[0];dateInput.value=t;localStorage.setItem("selectedDate",t);}
-dateInput.addEventListener("change",()=>{localStorage.setItem("selectedDate",dateInput.value);loadDataForDate();});
+  const dateInput=document.getElementById("selectedDate");
+  const savedDate=localStorage.getItem("selectedDate");
+  if(savedDate)dateInput.value=savedDate;else{const t=new Date().toISOString().split("T")[0];dateInput.value=t;localStorage.setItem("selectedDate",t);}
+  dateInput.addEventListener("change",()=>{localStorage.setItem("selectedDate",dateInput.value);loadDataForDate();});
 
-function updateClock(){document.getElementById("mainClock").textContent=new Date().toLocaleTimeString("en-GB");}
-setInterval(updateClock,1000);updateClock();
-const monthNames=["January","February","March","April","May","June","July","August","September","October","November","December"];
-const now=new Date();document.getElementById("monthTitle").textContent=`${monthNames[now.getMonth()]} ${now.getFullYear()}`;
+  function updateClock(){document.getElementById("mainClock").textContent=new Date().toLocaleTimeString("en-GB");}
+  setInterval(updateClock,1000);updateClock();
 
-const table=document.getElementById("timeSlotsTable");
-for(let h=0;h<24;h++){
-  const row=document.createElement("tr");
-  for(let m=0;m<2;m++){
-    const td=document.createElement("td");
-    const label=`${String(h).padStart(2,"0")}:${m===0?"00":"30"}`;
-    const cb=document.createElement("input");
-    cb.type="checkbox";cb.dataset.time=label;cb.onchange=()=>saveCheckbox(cb);
-    td.append(label,document.createElement("br"),cb);row.appendChild(td);
-  }table.appendChild(row);
-}
+  const monthNames=["January","February","March","April","May","June","July","August","September","October","November","December"];
+  const now=new Date();document.getElementById("monthTitle").textContent=`${monthNames[now.getMonth()]} ${now.getFullYear()}`;
 
-async function loadCheckboxes(){
-  if(!currentUser)return;
-  const date=dateInput.value;
-  const {data,error}=await supabase
-    .from("social_checks")
-    .select("*")
-    .eq("user_id",currentUser.id)
-    .eq("check_date",date);
-  if(error){console.error(error);return;}
-  const map={};(data||[]).forEach(r=>map[r.slot_time]=r.checked);
-  document.querySelectorAll("#timeSlotsTable input").forEach(cb=>cb.checked=!!map[cb.dataset.time]);
-  updateProgressBar();
-}
+  const table=document.getElementById("timeSlotsTable");
+  for(let h=0;h<24;h++){
+    const row=document.createElement("tr");
+    for(let m=0;m<2;m++){
+      const td=document.createElement("td");
+      const label=`${String(h).padStart(2,"0")}:${m===0?"00":"30"}`;
+      const cb=document.createElement("input");
+      cb.type="checkbox";cb.dataset.time=label;cb.onchange=()=>saveCheckbox(cb);
+      td.append(label,document.createElement("br"),cb);row.appendChild(td);
+    }table.appendChild(row);
+  }
 
-async function saveCheckbox(cb){
-  if(!currentUser)return;
-  const date=dateInput.value;
-  const existing={user_id:currentUser.id,check_date:date,slot_time:cb.dataset.time,checked:cb.checked};
-  const {error}=await supabase.from("social_checks").upsert(existing);
-  if(error)console.error(error);
-  updateProgressBar();
-}
+  async function loadCheckboxes(){
+    if(!currentUser)return;
+    const date=dateInput.value;
+    const {data}=await supabase.from("social_checks").select("*").eq("user_id",currentUser.id).eq("check_date",date);
+    const map={};(data||[]).forEach(r=>map[r.slot_time.substring(11,16)]=r.checked);
+    document.querySelectorAll("#timeSlotsTable input").forEach(cb=>cb.checked=!!map[cb.dataset.time]);
+    updateProgressBar();
+  }
 
-function updateProgressBar(){
-  const all=document.querySelectorAll("#timeSlotsTable input").length;
-  const checked=document.querySelectorAll("#timeSlotsTable input:checked").length;
-  const percent=Math.round((checked/all)*100);
-  document.getElementById("progressPercent").textContent=percent+"%";
-  document.getElementById("progressBar").style.width=percent+"%";
-}
+  async function saveCheckbox(cb){
+    if(!currentUser)return;
+    const date=dateInput.value;
+    const [h,m]=cb.dataset.time.split(":").map(Number);
+    const [y,mo,d]=date.split("-");
+    const localDate=new Date(y,mo-1,d,h,m,0,0);
+    const slot_time=localDate.toISOString();
 
-async function loadLogs(){
-  if(!currentUser)return;
-  const date=dateInput.value;
-  const {data}=await supabase.from("logs").select("*").eq("user_id",currentUser.id).eq("log_date",date).order("start_time");
-  const tbody=document.getElementById("entriesTable");
-  tbody.innerHTML="";
-  (data||[]).forEach(l=>{
-    const durMs=new Date(l.end_time)-new Date(l.start_time);
-    const mins=Math.floor(durMs/60000);
-    const dur=`${Math.floor(mins/60)}h ${mins%60}m`;
-    const row=`<tr><td>${l.log_date}</td><td>${new Date(l.start_time).toLocaleTimeString("en-GB")}</td><td>${new Date(l.end_time).toLocaleTimeString("en-GB")}</td><td>${dur}</td><td>${l.activity||""}</td><td>${l.tag||""}</td><td>${l.notes||""}</td></tr>`;
-    tbody.insertAdjacentHTML("beforeend",row);
-  });
-}
+    const { error }=await supabase.from("social_checks").upsert({
+      user_id:currentUser.id,check_date:date,slot_time,checked:cb.checked
+    });
 
-async function loadCreatorSessions(){
-  if(!currentUser)return;
-  const date=dateInput.value;
-  const {data,error}=await supabase
-    .from("social_sessions")
-    .select("*")
-    .eq("user_id",currentUser.id)
-    .eq("session_date",date)
-    .order("start_time");
-  if(error){console.error(error);return;}
-  const tbody=document.getElementById("creatorEntriesTable");
-  tbody.innerHTML="";
-  (data||[]).forEach(s=>{
-    const durMs=new Date(s.end_time)-new Date(s.start_time);
-    const mins=Math.floor(durMs/60000);
-    const typeText=s.usage_type?`(${s.usage_type})`:"";
-    const row=`<tr><td>${s.session_date}</td><td>${mins} min</td><td>${typeText}</td></tr>`;
-    tbody.insertAdjacentHTML("beforeend",row);
-  });
-}
+    if(error) console.error("saveCheckbox error:",error);
+    updateProgressBar();
+  }
 
-async function loadDataForDate(){
-  await loadCheckboxes();
-  await loadLogs();
-  await loadCreatorSessions();
-}
+  function updateProgressBar(){
+    const cbs=[...document.querySelectorAll("#timeSlotsTable input")];
+    const checked=cbs.filter(c=>c.checked).length;
+    const percent=Math.round((checked/cbs.length)*100);
+    document.getElementById("progressPercent").textContent=percent+"%";
+    document.getElementById("progressBar").value=percent;
+  }
 
-let clockedIn=false,startTime;
-document.getElementById("clockInBtn").onclick=()=>{
-  if(clockedIn)return alert("Already clocked in!");
-  clockedIn=true;startTime=new Date();
-  document.getElementById("clockStatus").textContent="Clocked in at "+startTime.toLocaleTimeString("en-GB");
-};
-document.getElementById("clockOutBtn").onclick=async()=>{
-  if(!clockedIn)return alert("Not clocked in!");
-  clockedIn=false;
-  const endTime=new Date();
-  const act=document.getElementById("activityInput").value;
-  const tag=document.getElementById("tagInput").value;
-  const notes=document.getElementById("notesInput").value;
-  const date=dateInput.value;
-  await supabase.from("logs").insert({user_id:currentUser.id,activity:act,tag,notes,start_time:startTime.toISOString(),end_time:endTime.toISOString(),log_date:date});
-  await loadLogs();
-  document.getElementById("clockStatus").textContent="Not currently clocked in.";
-};
+  async function loadLogs(){
+    if(!currentUser)return;
+    const date=dateInput.value;
+    const {data}=await supabase.from("logs").select("*").eq("user_id",currentUser.id).eq("log_date",date).order("start_time");
+    const tbody=document.getElementById("entriesTable");
+    tbody.innerHTML="";
+    (data||[]).forEach(l=>{
+      const durMs=new Date(l.end_time)-new Date(l.start_time);
+      const mins=Math.floor(durMs/60000);
+      const dur=`${Math.floor(mins/60)}h ${mins%60}m`;
+      const row=`<tr><td>${l.log_date}</td><td>${new Date(l.start_time).toLocaleTimeString("en-GB")}</td><td>${new Date(l.end_time).toLocaleTimeString("en-GB")}</td><td>${dur}</td><td>${l.activity||""}</td><td>${l.tag||""}</td><td>${l.notes||""}</td></tr>`;
+      tbody.insertAdjacentHTML("beforeend",row);
+    });
+  }
 
-let creatorTimerActive=false,creatorStartTime,creatorUsageType,creatorInterval;
-function startCreatorTimer(){
-  creatorStartTime=new Date();
-  creatorInterval=setInterval(()=>{
-    const diff=Math.floor((new Date()-creatorStartTime)/1000);
-    const m=String(Math.floor(diff/60)).padStart(2,"0");
-    const s=String(diff%60).padStart(2,"0");
-    document.getElementById("creatorTimer").textContent=`${m}:${s}`;
-  },1000);
-}
-function stopCreatorTimer(){clearInterval(creatorInterval);document.getElementById("creatorTimer").textContent="00:00";}
-async function saveCreatorSession(start,end,type){
-  if(!currentUser)return;
-  const date=dateInput.value;
-  await supabase.from("social_sessions").insert({
-    user_id:currentUser.id,
-    start_time:start.toISOString(),
-    end_time:end.toISOString(),
-    usage_type:type,
-    session_date:date
-  });
-}
+  async function loadCreatorSessions(){
+    if(!currentUser)return;
+    const date=dateInput.value;
+    const {data}=await supabase.from("social_sessions").select("*").eq("user_id",currentUser.id).eq("session_date",date).order("start_time");
+    const tbody=document.getElementById("creatorEntriesTable");
+    tbody.innerHTML="";
+    (data||[]).forEach(s=>{
+      const durMs=new Date(s.end_time)-new Date(s.start_time);
+      const mins=Math.floor(durMs/60000);
+      const typeText=s.usage_type?`(${s.usage_type})`:"";
+      const row=`<tr><td>${s.session_date}</td><td>${mins} min</td><td>${typeText}</td></tr>`;
+      tbody.insertAdjacentHTML("beforeend",row);
+    });
+  }
 
-document.getElementById("startCreatorSocial").onclick=()=>{if(creatorTimerActive)return;creatorUsageType="With Social";creatorTimerActive=true;startCreatorTimer();};
-document.getElementById("startCreatorNoSocial").onclick=()=>{if(creatorTimerActive)return;creatorUsageType="No Social";creatorTimerActive=true;startCreatorTimer();};
+  async function loadDataForDate(){
+    await loadCheckboxes();
+    await loadLogs();
+    await loadCreatorSessions();
+  }
 
-document.getElementById("stopCreator").onclick=async()=>{
-  if(!creatorTimerActive)return;
-  creatorTimerActive=false;
-  const end=new Date();
-  const minsNow=Math.floor((end-creatorStartTime)/60000);
-  const typeText=creatorUsageType?`(${creatorUsageType})`:"";
-  const row=`<tr><td>${dateInput.value}</td><td>${minsNow} min</td><td>${typeText}</td></tr>`;
-  document.getElementById("creatorEntriesTable").insertAdjacentHTML("beforeend",row);
-  stopCreatorTimer();
-  await saveCreatorSession(creatorStartTime,end,creatorUsageType);
-  await loadCreatorSessions(); // <-- Added back to reload saved data
-};
+  let clockedIn=false,startTime;
+  document.getElementById("clockInBtn").onclick=()=>{
+    if(clockedIn)return alert("Already clocked in!");
+    clockedIn=true;startTime=new Date();
+    document.getElementById("clockStatus").textContent="Clocked in at "+startTime.toLocaleTimeString("en-GB");
+  };
+  document.getElementById("clockOutBtn").onclick=async()=>{
+    if(!clockedIn)return alert("Not clocked in!");
+    clockedIn=false;
+    const endTime=new Date();
+    const act=document.getElementById("activityInput").value;
+    const tag=document.getElementById("tagInput").value;
+    const notes=document.getElementById("notesInput").value;
+    const date=dateInput.value;
+    await supabase.from("logs").insert({user_id:currentUser.id,activity:act,tag,notes,start_time:startTime.toISOString(),end_time:endTime.toISOString(),log_date:date});
+    await loadLogs();
+    document.getElementById("clockStatus").textContent="Not currently clocked in.";
+  };
 
-supabase.auth.onAuthStateChange((_e,s)=>{if(s?.user)loadDataForDate();});
-</script>
+  // Creator Session
+  let creatorTimerActive=false,creatorStartTime,creatorUsageType,creatorInterval;
+  function startCreatorTimer(){
+    creatorStartTime=new Date();
+    creatorInterval=setInterval(()=>{
+      const diff=Math.floor((new Date()-creatorStartTime)/1000);
+      const m=String(Math.floor(diff/60)).padStart(2,"0");
+      const s=String(diff%60).padStart(2,"0");
+      document.getElementById("creatorTimer").textContent=`${m}:${s}`;
+    },1000);
+  }
+  function stopCreatorTimer(){clearInterval(creatorInterval);document.getElementById("creatorTimer").textContent="00:00";}
+  async function saveCreatorSession(start,end,type){
+    if(!currentUser)return;
+    const date=dateInput.value;
+    await supabase.from("social_sessions").insert({user_id:currentUser.id,start_time:start.toISOString(),end_time:end.toISOString(),usage_type:type,session_date:date});
+  }
+
+  document.getElementById("startCreatorSocial").onclick=()=>{if(creatorTimerActive)return;creatorUsageType="With Social";creatorTimerActive=true;startCreatorTimer();};
+  document.getElementById("startCreatorNoSocial").onclick=()=>{if(creatorTimerActive)return;creatorUsageType="No Social";creatorTimerActive=true;startCreatorTimer();};
+  document.getElementById("stopCreator").onclick=async()=>{
+    if(!creatorTimerActive)return;
+    creatorTimerActive=false;
+    const end=new Date();
+    const minsNow=Math.floor((end-creatorStartTime)/60000);
+    const typeText=creatorUsageType?`(${creatorUsageType})`:"";
+    const row=`<tr><td>${dateInput.value}</td><td>${minsNow} min</td><td>${typeText}</td></tr>`;
+    document.getElementById("creatorEntriesTable").insertAdjacentHTML("beforeend",row);
+    stopCreatorTimer();
+    await saveCreatorSession(creatorStartTime,end,creatorUsageType);
+  };
+
+  supabase.auth.onAuthStateChange((_e,s)=>{if(s?.user)loadDataForDate();});
+  </script>
 </body>
 </html>
 
