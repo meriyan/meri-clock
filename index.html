@@ -283,20 +283,29 @@
     });
   }
 
-  async function loadCreatorSessions(){
-    if(!currentUser)return;
-    const date=dateInput.value;
-    const {data}=await supabase.from("social_sessions").select("*").eq("user_id",currentUser.id).eq("session_date",date).order("start_time");
-    const tbody=document.getElementById("creatorEntriesTable");
-    tbody.innerHTML="";
-    (data||[]).forEach(s=>{
-      const durMs=new Date(s.end_time)-new Date(s.start_time);
-      const mins=Math.floor(durMs/60000);
-      const typeText=s.usage_type?`(${s.usage_type})`:"";
-      const row=`<tr><td>${s.session_date}</td><td>${mins} min</td><td>${typeText}</td></tr>`;
-      tbody.insertAdjacentHTML("beforeend",row);
-    });
-  }
+async function loadCreatorSessions() {
+  if (!currentUser) return;
+  const date = dateInput.value;
+  const { data } = await supabase
+    .from("social_sessions")
+    .select("*")
+    .eq("user_id", currentUser.id)
+    .eq("session_date", date)
+    .order("start_time");
+
+  const tbody = document.getElementById("creatorEntriesTable");
+  tbody.innerHTML = "";
+
+  (data || []).forEach(s => {
+    const durMs = new Date(s.end_time) - new Date(s.start_time);
+    const mins = Math.floor(durMs / 60000);
+    const secs = Math.floor((durMs % 60000) / 1000);
+    const typeText = s.usage_type ? `(${s.usage_type.replace("_", " ")})` : "";
+    const row = `<tr><td>${s.session_date}</td><td>${mins}m ${secs}s</td><td>${typeText}</td></tr>`;
+    tbody.insertAdjacentHTML("beforeend", row);
+  });
+}
+
 
   async function loadDataForDate(){
     await loadCheckboxes();
