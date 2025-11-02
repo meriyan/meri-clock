@@ -220,21 +220,35 @@
     updateProgressBar();
   }
 
-  async function saveCheckbox(cb){
-    if(!currentUser)return;
-    const date=dateInput.value;
-    const [h,m]=cb.dataset.time.split(":").map(Number);
-    const [y,mo,d]=date.split("-");
-    const localDate=new Date(y,mo-1,d,h,m,0,0);
-    const slot_time=localDate.toISOString();
+async function saveCheckbox(cb) {
+  const slot_time = cb.dataset.time; // example: "00:00"
+  const date = selectedDate || new Date().toISOString().split("T")[0];
+  const { data: { user } } = await supabase.auth.getUser();
 
-    const { error }=await supabase.from("social_checks").upsert({
-      user_id:currentUser.id,check_date:date,slot_time,checked:cb.checked
-    });
-
-    if(error) console.error("saveCheckbox error:",error);
-    updateProgressBar();
+  if (!user) {
+    console.error("No user logged in!");
+    return;
   }
+
+  try {
+    const { error } = await supabase
+      .from("social_checks")
+      .upsert(
+        {
+          user_id: user.id,
+          check_date: date,
+          slot_time: `${slot_time}:00`, // ensures valid timestamp-like string
+          checked: cb.checked
+        },
+        { onConflict: "user_id,check_date,slot_time" }
+      );
+
+    if (error) throw error;
+    console.log("✅ Checkbox saved:", slot_time, cb.checked);
+  } catch (err) {
+    console.error("saveCheckbox error:", err);
+  }
+}
 
   function updateProgressBar(){
     const cbs=[...document.querySelectorAll("#timeSlotsTable input")];
