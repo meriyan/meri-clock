@@ -83,6 +83,11 @@
   <div class="clock" id="mainClock"></div>
 
   <div class="section">
+    <h2>Select Date</h2>
+    <input type="date" id="selectedDate" />
+  </div>
+
+  <div class="section">
     <h2>Clock In / Clock Out</h2>
     <input type="text" id="activityInput" placeholder="What are you doing?" />
     <select id="tagInput">
@@ -133,10 +138,24 @@
 
   <script>
     // ✅ Initialize Supabase
-    const supabaseUrl = "https://YOUR_PROJECT_URL.supabase.co"; 
+    const supabaseUrl = "https://YOUR_PROJECT_URL.supabase.co";
     const supabaseKey = "YOUR_SUPABASE_ANON_KEY";
     const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
-    const user_id = "meri_default_user"; // static user ID (no login needed)
+    const user_id = "meri_default_user"; // static user ID
+
+    // ✅ Persistent Date Selection
+    const dateInput = document.getElementById("selectedDate");
+    const savedDate = localStorage.getItem("selectedDate");
+    if (savedDate) {
+      dateInput.value = savedDate;
+    } else {
+      const today = new Date().toISOString().split("T")[0];
+      dateInput.value = today;
+      localStorage.setItem("selectedDate", today);
+    }
+    dateInput.addEventListener("change", () => {
+      localStorage.setItem("selectedDate", dateInput.value);
+    });
 
     // ✅ Flip Clock
     function updateClock() {
@@ -146,22 +165,20 @@
     setInterval(updateClock, 1000);
     updateClock();
 
-    // ✅ Month + Year title
+    // ✅ Month title
     const monthNames = [
       "January","February","March","April","May","June","July","August","September","October","November","December"
     ];
     const now = new Date();
     document.getElementById("monthTitle").textContent = `${monthNames[now.getMonth()]} ${now.getFullYear()}`;
 
-    // ✅ Generate 48 half-hour checkboxes
+    // ✅ Generate half-hour slots
     const table = document.getElementById("timeSlotsTable");
     for (let h = 0; h < 24; h++) {
       const row = document.createElement("tr");
       for (let m = 0; m < 2; m++) {
         const td = document.createElement("td");
-        const timeLabel = document.createTextNode(
-          `${String(h).padStart(2, "0")}:${m === 0 ? "00" : "30"}`
-        );
+        const timeLabel = document.createTextNode(`${String(h).padStart(2, "0")}:${m === 0 ? "00" : "30"}`);
         const checkbox = document.createElement("input");
         checkbox.type = "checkbox";
         checkbox.checked = false;
@@ -173,7 +190,7 @@
       table.appendChild(row);
     }
 
-    // ✅ Clock In / Out
+    // ✅ Clock In/Out
     let clockedIn = false;
     let startTime;
 
@@ -195,22 +212,27 @@
       const activity = document.getElementById("activityInput").value;
       const tag = document.getElementById("tagInput").value;
       const notes = document.getElementById("notesInput").value;
+      const session_date = document.getElementById("selectedDate").value;
 
-      const { data, error } = await supabase.from("logs").insert([
-        {
-          user_id,
-          activity,
-          tag,
-          notes,
-          start_time: startTime.toISOString(),
-          end_time: endTime.toISOString(),
-          log_date: new Date().toISOString().split("T")[0],
-        },
-      ]);
-      if (error) console.error(error);
+      try {
+        const { data, error } = await supabase.from("logs").insert([
+          {
+            user_id,
+            activity,
+            tag,
+            notes,
+            start_time: startTime.toISOString(),
+            end_time: endTime.toISOString(),
+            log_date: session_date,
+          },
+        ]);
+        if (error) console.error("Insert error:", error);
+      } catch (err) {
+        console.error("Network error:", err);
+      }
 
       const row = `<tr>
-        <td>${new Date().toLocaleDateString()}</td>
+        <td>${session_date}</td>
         <td>${startTime.toLocaleTimeString("en-GB")}</td>
         <td>${endTime.toLocaleTimeString("en-GB")}</td>
         <td>${durationFormatted}</td>
@@ -223,7 +245,7 @@
       document.getElementById("clockStatus").textContent = "Not currently clocked in.";
     });
 
-    // ✅ Creator Clock Logic
+    // ✅ Creator Sessions
     let creatorTimerActive = false;
     let creatorStartTime;
     let creatorUsageType;
@@ -245,6 +267,7 @@
     }
 
     async function saveCreatorSession(startTime, endTime, usageType) {
+      const session_date = document.getElementById("selectedDate").value;
       try {
         const { data, error } = await supabase.from("social_sessions").insert([
           {
@@ -252,19 +275,14 @@
             start_time: startTime.toISOString(),
             end_time: endTime.toISOString(),
             usage_type: usageType,
-            session_date: new Date().toISOString().split("T")[0],
+            session_date,
           },
         ]);
-
-        if (error) {
-          console.error("Save creator session failed:", error);
-          alert(`Save creator session failed: ${error.message}`);
-        } else {
-          console.log("Creator session saved successfully:", data);
-        }
+        if (error) throw error;
+        console.log("Creator session saved:", data);
       } catch (err) {
-        console.error("Unexpected error:", err);
-        alert("Unexpected error saving creator session.");
+        console.error("Creator session failed:", err);
+        alert("Save creator session failed: " + err);
       }
     }
 
@@ -284,11 +302,12 @@
       if (!creatorTimerActive) return;
       creatorTimerActive = false;
       const endTime = new Date();
-      await saveCreatorSession(creatorStartTime, endTime, creatorUsageType);
       stopCreatorTimer();
+      await saveCreatorSession(creatorStartTime, endTime, creatorUsageType);
     });
   </script>
 </body>
 </html>
+
 
 
