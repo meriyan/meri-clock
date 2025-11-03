@@ -268,20 +268,47 @@
     document.getElementById("progressBar").value=percent;
   }
 
-  async function loadLogs(){
-    if(!currentUser)return;
-    const date=dateInput.value;
-    const {data}=await supabase.from("logs").select("*").eq("user_id",currentUser.id).eq("log_date",date).order("start_time");
-    const tbody=document.getElementById("entriesTable");
-    tbody.innerHTML="";
-    (data||[]).forEach(l=>{
-      const durMs=new Date(l.end_time)-new Date(l.start_time);
-      const mins=Math.floor(durMs/60000);
-      const dur=`${Math.floor(mins/60)}h ${mins%60}m`;
-      const row=`<tr><td>${l.log_date}</td><td>${new Date(l.start_time).toLocaleTimeString("en-GB")}</td><td>${new Date(l.end_time).toLocaleTimeString("en-GB")}</td><td>${dur}</td><td>${l.activity||""}</td><td>${l.tag||""}</td><td>${l.notes||""}</td></tr>`;
-      tbody.insertAdjacentHTML("beforeend",row);
-    });
-  }
+async function loadLogs() {
+  if (!currentUser) return;
+  const date = dateInput.value;
+  const { data } = await supabase
+    .from("logs")
+    .select("*")
+    .eq("user_id", currentUser.id)
+    .eq("log_date", date)
+    .order("start_time");
+
+  const tbody = document.getElementById("entriesTable");
+  tbody.innerHTML = "";
+
+  (data || []).forEach(l => {
+    const durMs = new Date(l.end_time) - new Date(l.start_time);
+    const mins = Math.floor(durMs / 60000);
+    const dur = `${Math.floor(mins / 60)}h ${mins % 60}m`;
+
+    // ✅ Force Berlin time zone
+    const startLocal = new Date(l.start_time).toLocaleTimeString("en-GB", { timeZone: "Europe/Berlin" });
+    const endLocal = new Date(l.end_time).toLocaleTimeString("en-GB", { timeZone: "Europe/Berlin" });
+
+    // ✅ Also ensure date displays correctly in Berlin time
+    const dateLocal = new Date(l.start_time).toLocaleDateString("en-GB", { timeZone: "Europe/Berlin" });
+
+    const row = `
+      <tr>
+        <td>${dateLocal}</td>
+        <td>${startLocal}</td>
+        <td>${endLocal}</td>
+        <td>${dur}</td>
+        <td>${l.activity || ""}</td>
+        <td>${l.tag || ""}</td>
+        <td>${l.notes || ""}</td>
+      </tr>
+    `;
+
+    tbody.insertAdjacentHTML("beforeend", row);
+  });
+}
+
 
 async function loadCreatorSessions() {
   if (!currentUser) return;
