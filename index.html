@@ -143,7 +143,6 @@
   const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVxcXVuY2xmeHptZm9zand6d2tpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjE5NDg1MDQsImV4cCI6MjA3NzUyNDUwNH0.1N5pYTxFf6PjCMgQ0nUICsc9jLL58LuDZgX_s8yLe_w";
   const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
 
-  // --- helpers (display in Berlin) ---
   const TZ = "Europe/Berlin";
   const fmtTime = (d) => new Date(d).toLocaleTimeString("en-GB", { timeZone: TZ });
   const fmtDate = (d) => new Date(d).toLocaleDateString("en-GB", { timeZone: TZ });
@@ -198,7 +197,6 @@
   if(savedDate){
     dateInput.value=savedDate;
   }else{
-    // local date (yyyy-mm-dd)
     const t=new Date();
     const yyyy=t.getFullYear();
     const mm=String(t.getMonth()+1).padStart(2,"0");
@@ -238,15 +236,16 @@
     updateProgressBar();
   }
 
-  // save half-hour checks (stored as UTC instant; display is Berlin)
+  // ✅ FIXED TIMEZONE LOGIC (Berlin DST-safe)
   async function saveCheckbox(cb) {
     const rawSlot = cb.dataset.time?.trim();
     const date = dateInput.value || new Date().toISOString().split("T")[0];
     const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
-    if (!rawSlot || !/^\d{2}:\d{2}$/.test(rawSlot)) return;
+    if (!user || !rawSlot || !/^\d{2}:\d{2}$/.test(rawSlot)) return;
 
-    const slot_time = `${date}T${rawSlot}:00Z`;
+    const localDateTime = new Date(`${date}T${rawSlot}:00`);
+    const utcTime = new Date(localDateTime.getTime() - localDateTime.getTimezoneOffset() * 60000);
+    const slot_time = utcTime.toISOString();
 
     try {
       const { error } = await supabase
@@ -355,14 +354,17 @@
     const notes=document.getElementById("notesInput").value;
     const date=dateInput.value;
 
-    // store as UTC (ISO); we display in Berlin later
+    // ✅ FIXED: Convert to proper UTC before saving
+    const startUtc = new Date(startTime.getTime() - startTime.getTimezoneOffset() * 60000).toISOString();
+    const endUtc = new Date(endTime.getTime() - endTime.getTimezoneOffset() * 60000).toISOString();
+
     await supabase.from("logs").insert({
       user_id: currentUser.id,
       activity: act,
       tag,
       notes,
-      start_time: startTime.toISOString(),
-      end_time: endTime.toISOString(),
+      start_time: startUtc,
+      end_time: endUtc,
       log_date: date
     });
 
@@ -388,59 +390,60 @@
     document.getElementById("creatorTimer").textContent = "00:00";
   }
 
-  // save creator sessions
   async function saveCreatorSession(start, end, type) {
     if (!currentUser) return;
     const date = dateInput.value;
     const normalizedType = type === "with_social" ? "with_social" : "no_social";
 
+    const startUtc = new Date(start.getTime() - start.getTimezoneOffset() * 60000).toISOString();
+    const endUtc = new Date(end.getTime() - end.getTimezoneOffset() * 60000).toISOString();
+
+
     const payload = {
       user_id: currentUser.id,
-      start_time: new Date(start).toISOString(),
-      end_time: new Date(end).toISOString(),
+      start_time: startUtc,
+      end_time: endUtc,
       usage_type: normalizedType,
       session_date: date
-    };
+        };
 
-    const { error } = await supabase.from("social_sessions").insert(payload);
-    if (error) console.error("❌ saveCreatorSession error:", error.message);
+    try {
+      const { error } = await supabase
+        .from("social_sessions")
+        .insert(payload);
+
+      if (error) throw error;
+    } catch (err) {
+      console.error("saveCreatorSession error:", err);
+    }
   }
 
+  // ---- Creator Session Buttons ----
   document.getElementById("startCreatorSocial").onclick = () => {
     if (creatorTimerActive) return;
-    creatorUsageType = "with_social";
     creatorTimerActive = true;
+    creatorUsageType = "with_social";
     startCreatorTimer();
   };
 
   document.getElementById("startCreatorNoSocial").onclick = () => {
     if (creatorTimerActive) return;
-    creatorUsageType = "no_social";
     creatorTimerActive = true;
+    creatorUsageType = "no_social";
     startCreatorTimer();
   };
 
   document.getElementById("stopCreator").onclick = async () => {
     if (!creatorTimerActive) return;
     creatorTimerActive = false;
-
     const end = new Date();
-    const diffMs = end - creatorStartTime;
-    const minsNow = Math.floor(diffMs / 60000);
-    const secsNow = Math.floor((diffMs % 60000) / 1000);
-
-    const typeText = creatorUsageType ? `(${creatorUsageType.replace("_", " ")})` : "";
-    const row = `<tr><td>${dateInput.value}</td><td>${minsNow}m ${secsNow}s</td><td>${typeText}</td></tr>`;
-    document.getElementById("creatorEntriesTable").insertAdjacentHTML("beforeend", row);
-
     stopCreatorTimer();
     await saveCreatorSession(creatorStartTime, end, creatorUsageType);
+    await loadCreatorSessions();
   };
 
-  supabase.auth.onAuthStateChange((_e,s)=>{if(s?.user)loadDataForDate();});
+  // Load all data initially
+  loadDataForDate();
   </script>
 </body>
 </html>
-
-
-
