@@ -192,6 +192,7 @@
   supabase.auth.onAuthStateChange((_e,s)=>{if(s?.user)showApp(s.user);else showLogin();});
   checkSession();
 
+  // Date handling
   const dateInput=document.getElementById("selectedDate");
   const savedDate=localStorage.getItem("selectedDate");
   if(savedDate){
@@ -206,15 +207,18 @@
   }
   dateInput.addEventListener("change",()=>{localStorage.setItem("selectedDate",dateInput.value);loadDataForDate();});
 
+  // Live clock
   function updateClock(){
     document.getElementById("mainClock").textContent=
       new Date().toLocaleTimeString("en-GB",{ timeZone: TZ });
   }
   setInterval(updateClock,1000);updateClock();
 
+  // Month title
   const monthNames=["January","February","March","April","May","June","July","August","September","October","November","December"];
   const now=new Date();document.getElementById("monthTitle").textContent=`${monthNames[now.getMonth()]} ${now.getFullYear()}`;
 
+  // Create 30-min slot table
   const table=document.getElementById("timeSlotsTable");
   for(let h=0;h<24;h++){
     const row=document.createElement("tr");
@@ -236,7 +240,6 @@
     updateProgressBar();
   }
 
-  // ✅ FIXED TIMEZONE LOGIC (Berlin DST-safe)
   async function saveCheckbox(cb) {
     const rawSlot = cb.dataset.time?.trim();
     const date = dateInput.value || new Date().toISOString().split("T")[0];
@@ -339,22 +342,53 @@
     await loadCreatorSessions();
   }
 
-  let clockedIn=false,startTime;
-  document.getElementById("clockInBtn").onclick=()=>{
-    if(clockedIn)return alert("Already clocked in!");
-    clockedIn=true;startTime=new Date();
-    document.getElementById("clockStatus").textContent="Clocked in at "+fmtTime(startTime);
-  };
-  document.getElementById("clockOutBtn").onclick=async()=>{
-    if(!clockedIn)return alert("Not clocked in!");
-    clockedIn=false;
-    const endTime=new Date();
-    const act=document.getElementById("activityInput").value;
-    const tag=document.getElementById("tagInput").value;
-    const notes=document.getElementById("notesInput").value;
-    const date=dateInput.value;
+  // ✅ Clock In persistence feature
+  let clockedIn = false, startTime;
+  const statusEl = document.getElementById("clockStatus");
+  const inBtn = document.getElementById("clockInBtn");
+  const outBtn = document.getElementById("clockOutBtn");
 
-    // ✅ FIXED: Convert to proper UTC before saving
+  // Load saved state
+  const savedClock = localStorage.getItem("clockInData");
+  if(savedClock){
+    const data = JSON.parse(savedClock);
+    clockedIn = true;
+    startTime = new Date(data.startTime);
+    statusEl.textContent = "Clocked in at " + fmtTime(startTime);
+    inBtn.disabled = true;
+    outBtn.disabled = false;
+  } else {
+    statusEl.textContent = "Not currently clocked in.";
+    inBtn.disabled = false;
+    outBtn.disabled = true;
+  }
+
+  inBtn.onclick = () => {
+    if (clockedIn) return alert("Already clocked in!");
+    clockedIn = true;
+    startTime = new Date();
+    localStorage.setItem("clockInData", JSON.stringify({
+      startTime: startTime.toISOString(),
+      activity: document.getElementById("activityInput").value,
+      tag: document.getElementById("tagInput").value,
+      notes: document.getElementById("notesInput").value,
+      date: dateInput.value
+    }));
+    statusEl.textContent = "Clocked in at " + fmtTime(startTime);
+    inBtn.disabled = true;
+    outBtn.disabled = false;
+  };
+
+  outBtn.onclick = async () => {
+    if (!clockedIn) return alert("Not clocked in!");
+    clockedIn = false;
+    const endTime = new Date();
+    const saved = JSON.parse(localStorage.getItem("clockInData")) || {};
+    const act = saved.activity || document.getElementById("activityInput").value;
+    const tag = saved.tag || document.getElementById("tagInput").value;
+    const notes = saved.notes || document.getElementById("notesInput").value;
+    const date = saved.date || dateInput.value;
+
     const startUtc = new Date(startTime.getTime() - startTime.getTimezoneOffset() * 60000).toISOString();
     const endUtc = new Date(endTime.getTime() - endTime.getTimezoneOffset() * 60000).toISOString();
 
@@ -369,10 +403,20 @@
     });
 
     await loadLogs();
-    document.getElementById("clockStatus").textContent="Not currently clocked in.";
+
+    // ✅ Reset the localStorage after clock out
+    localStorage.removeItem("clockInData");
+
+    // ✅ Reset UI
+    statusEl.textContent = "Not currently clocked in.";
+    inBtn.disabled = false;
+    outBtn.disabled = true;
   };
 
-  // Creator Session
+  // --------------------
+  // CREATOR SESSION LOGIC
+  // --------------------
+
   let creatorTimerActive = false, creatorStartTime, creatorUsageType, creatorInterval;
 
   function startCreatorTimer() {
@@ -398,27 +442,23 @@
     const startUtc = new Date(start.getTime() - start.getTimezoneOffset() * 60000).toISOString();
     const endUtc = new Date(end.getTime() - end.getTimezoneOffset() * 60000).toISOString();
 
-
     const payload = {
       user_id: currentUser.id,
       start_time: startUtc,
       end_time: endUtc,
       usage_type: normalizedType,
       session_date: date
-        };
+    };
 
     try {
-      const { error } = await supabase
-        .from("social_sessions")
-        .insert(payload);
-
+      const { error } = await supabase.from("social_sessions").insert(payload);
       if (error) throw error;
     } catch (err) {
       console.error("saveCreatorSession error:", err);
     }
   }
 
-  // ---- Creator Session Buttons ----
+  // ---- Creator Buttons ----
   document.getElementById("startCreatorSocial").onclick = () => {
     if (creatorTimerActive) return;
     creatorTimerActive = true;
@@ -442,8 +482,9 @@
     await loadCreatorSessions();
   };
 
-  // Load all data initially
+  // Load everything initially
   loadDataForDate();
   </script>
 </body>
 </html>
+
